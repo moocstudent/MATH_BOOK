@@ -1,0 +1,14 @@
+# Plaintext Firebase config — keep local (the committed .enc.js is the source of truth)
+firebase-config.local.json
+
+# NOTE: firebase-key.local.js IS committed on purpose. A Firebase *web* config is an
+# identifier, not a secret; the public site must be able to decrypt firebase-config.enc.js
+# to talk to Firebase. Real protection = Authorized domains + Security Rules + App Check.
+# (Same decision as the AI_BOOK sibling project.)
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+.vscode/
