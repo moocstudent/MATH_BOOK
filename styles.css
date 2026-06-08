@@ -1682,3 +1682,16 @@ html[data-theme="dark"] .course-prose .katex { color: var(--ink); }
 /* The gated lockwall sits inside a chapter section, so trim its top padding */
 .cs-block .lockwall { padding-top: 24px; min-height: 0; }
 .cs-block .lockwall-card { margin-top: 24px; margin-bottom: 24px; }
+
+/* FIX (vertical CJK headings): markdown headings rendered inside .course-prose are
+   descendants of the chapter's `.cs-block` section, so the section-header rule
+   `.cs-block h2 { display:grid; grid-template-columns:36px 1fr }` was leaking onto
+   them — squeezing titles like 典型例题 / 练习与自测 into a 36px column, stacking each
+   character on its own line. Re-assert normal block flow (higher specificity wins). */
+.cs-block .course-prose h2,
+.cs-block .course-prose h3 {
+  display: block;
+  grid-template-columns: none;
+  gap: 0;
+  font-style: normal;
+}
