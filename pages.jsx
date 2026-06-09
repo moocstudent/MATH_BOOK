@@ -337,7 +337,7 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
 
   React.useEffect(() => {
     const handler = () => {
-      const sections = ["intro", "obj", "outline", "notes"];
+      const sections = ["intro", "obj", "outline", "viz", "notes"];
       let current = "intro";
       for (const s of sections) {
         const el = document.getElementById(`s-${s}`);
@@ -357,6 +357,7 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
     ["intro", t("toc_intro")],
     ["obj", t("toc_obj")],
     ["outline", t("toc_outline")],
+    ...(c.viz ? [["viz", t("toc_viz")]] : []),
     ["notes", t("toc_notes")],
   ];
   const goTo = (sid) => {
@@ -435,6 +436,15 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
                   {c.outline.map((o, i) => <li key={i}>{pick(lang, o)}</li>)}
                 </ol>
               </section>
+
+              {/* ✦ Interactive demo (FREE) */}
+              {c.viz && (
+                <section id="s-viz" className="cs-block">
+                  <h2><span className="idx">✦</span> <span className="cn">{t("ch_sec_viz")}</span></h2>
+                  <p style={{ color: "var(--muted)", margin: "0 0 16px", fontSize: 14 }}>{t("viz_hint")}</p>
+                  <Viz name={c.viz} />
+                </section>
+              )}
 
               {/* 03 Core content (LOCKED) */}
               <section id="s-notes" className="cs-block">

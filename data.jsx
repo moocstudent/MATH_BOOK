@@ -57,6 +57,22 @@ const MODULES = [
     },
   },
   {
+    id: "m12",
+    code: "F4",
+    zh: "高中专项",
+    en: "High-School Topics",
+    accent: "primary",
+    level: 2,
+    tagline: {
+      zh: "指对数、三角、数列——高中三大主力。",
+      en: "Exponentials, trig and sequences — the high-school workhorses.",
+    },
+    description: {
+      zh: "指数与对数、三角函数、三角恒等变换与解三角形、数列。高中数学的核心工具,直接通往微积分、复变与统计。",
+      en: "Exponentials and logarithms, trigonometric functions, identities and solving triangles, and sequences. The core high-school toolkit, leading straight into calculus, complex analysis and statistics.",
+    },
+  },
+  {
     id: "m1",
     code: "M1",
     zh: "高等数学",
@@ -369,7 +385,7 @@ const CHAPTERS = [
 
   /* ============ F3 函数与几何 / Functions & Geometry ============ */
   {
-    id: "f1", code: "FG1", moduleId: "m11", difficulty: 1, hours: 7, prereq: ["e1"],
+    id: "f1", code: "FG1", moduleId: "m11", difficulty: 1, hours: 7, prereq: ["e1"], viz: "linear",
     nExamples: 5, nExercises: 6,
     title: { zh: "一次函数", en: "Linear Functions" },
     summary: {
@@ -391,7 +407,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "f2", code: "FG2", moduleId: "m11", difficulty: 2, hours: 8, prereq: ["e3"],
+    id: "f2", code: "FG2", moduleId: "m11", difficulty: 2, hours: 8, prereq: ["e3"], viz: "quadratic",
     nExamples: 5, nExercises: 6,
     title: { zh: "二次函数", en: "Quadratic Functions" },
     summary: {
@@ -457,6 +473,96 @@ const CHAPTERS = [
     ],
   },
 
+  /* ============ F4 高中专项 / High-School Topics ============ */
+  {
+    id: "h1", code: "HS1", moduleId: "m12", difficulty: 2, hours: 8, prereq: ["n4"], viz: "explog",
+    nExamples: 5, nExercises: 6,
+    title: { zh: "指数与对数", en: "Exponentials & Logarithms" },
+    summary: {
+      zh: "指数函数与对数函数互为反函数;掌握它们的运算法则、图象与性质。",
+      en: "Exponential and logarithmic functions are inverses; master their laws, graphs and properties.",
+    },
+    objectives: [
+      { zh: "掌握分数指数幂与指数运算", en: "Master fractional exponents and the laws of exponents" },
+      { zh: "掌握对数运算法则", en: "Master the laws of logarithms" },
+      { zh: "理解指数函数与对数函数互为反函数", en: "Understand exp and log as inverse functions" },
+      { zh: "会解简单的指数、对数方程与不等式", en: "Solve simple exponential and logarithmic equations/inequalities" },
+    ],
+    outline: [
+      { zh: "指数与指数运算(分数指数幂)", en: "Exponents and fractional powers" },
+      { zh: "指数函数的图象与性质", en: "The exponential function: graph and properties" },
+      { zh: "对数与对数运算法则", en: "Logarithms and their laws" },
+      { zh: "对数函数的图象与性质", en: "The logarithmic function: graph and properties" },
+      { zh: "指数对数方程与不等式", en: "Exponential and logarithmic equations/inequalities" },
+    ],
+  },
+  {
+    id: "h2", code: "HS2", moduleId: "m12", difficulty: 2, hours: 10, prereq: ["f3"], viz: "trig",
+    nExamples: 5, nExercises: 6,
+    title: { zh: "三角函数", en: "Trigonometric Functions" },
+    summary: {
+      zh: "用单位圆定义任意角的三角函数,理解它们的周期图象与正弦型变换。",
+      en: "Define trig functions for any angle via the unit circle; understand their periodic graphs and sinusoidal transforms.",
+    },
+    objectives: [
+      { zh: "理解弧度制与任意角", en: "Understand radians and angles of any size" },
+      { zh: "掌握三角函数的定义与同角关系", en: "Master the definitions and the Pythagorean identity" },
+      { zh: "掌握三角函数的图象与性质", en: "Master the graphs and properties of trig functions" },
+      { zh: "理解 y=A sin(ωx+φ) 的图象变换", en: "Understand the transforms of y=A·sin(ωx+φ)" },
+    ],
+    outline: [
+      { zh: "角与弧度制", en: "Angles and radian measure" },
+      { zh: "任意角三角函数的定义(单位圆)", en: "Trig functions via the unit circle" },
+      { zh: "同角关系与诱导公式", en: "The Pythagorean identity and reduction formulas" },
+      { zh: "正弦、余弦、正切的图象与性质", en: "Graphs and properties of sin, cos, tan" },
+      { zh: "函数 y=A sin(ωx+φ)", en: "The function y=A·sin(ωx+φ)" },
+    ],
+  },
+  {
+    id: "h3", code: "HS3", moduleId: "m12", difficulty: 3, hours: 8, prereq: ["h2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "三角恒等变换与解三角形", en: "Trig Identities & Triangles" },
+    summary: {
+      zh: "和差倍角公式用于化简求值;正弦、余弦定理用于解三角形。",
+      en: "Sum/difference and double-angle formulas simplify expressions; the law of sines and cosines solve triangles.",
+    },
+    objectives: [
+      { zh: "掌握两角和差与二倍角公式", en: "Master the sum/difference and double-angle formulas" },
+      { zh: "会化简与求值三角式", en: "Simplify and evaluate trigonometric expressions" },
+      { zh: "掌握正弦定理与余弦定理", en: "Master the laws of sines and cosines" },
+      { zh: "会解三角形并求面积", en: "Solve triangles and find areas" },
+    ],
+    outline: [
+      { zh: "两角和与差的公式", en: "Sum and difference formulas" },
+      { zh: "二倍角公式", en: "Double-angle formulas" },
+      { zh: "三角函数式的化简与求值", en: "Simplifying and evaluating expressions" },
+      { zh: "正弦定理与余弦定理", en: "The laws of sines and cosines" },
+      { zh: "解三角形与面积", en: "Solving triangles and areas" },
+    ],
+  },
+  {
+    id: "h4", code: "HS4", moduleId: "m12", difficulty: 2, hours: 8, prereq: ["n3"], viz: "sequence",
+    nExamples: 5, nExercises: 6,
+    title: { zh: "数列", en: "Sequences & Series" },
+    summary: {
+      zh: "等差与等比数列的通项与求和,以及错位相减、裂项等求和技巧。",
+      en: "General terms and sums of arithmetic and geometric sequences, plus summation tricks.",
+    },
+    objectives: [
+      { zh: "理解数列与通项公式", en: "Understand sequences and general-term formulas" },
+      { zh: "掌握等差数列及其求和", en: "Master arithmetic sequences and their sums" },
+      { zh: "掌握等比数列及其求和", en: "Master geometric sequences and their sums" },
+      { zh: "会用错位相减、裂项等求和方法", en: "Use shifting-subtraction and telescoping to sum series" },
+    ],
+    outline: [
+      { zh: "数列的概念与通项", en: "Sequences and the general term" },
+      { zh: "等差数列", en: "Arithmetic sequences" },
+      { zh: "等差数列求和", en: "Sums of arithmetic sequences" },
+      { zh: "等比数列与求和", en: "Geometric sequences and their sums" },
+      { zh: "数列求和的常用方法", en: "Common summation techniques" },
+    ],
+  },
+
   /* ============ M1 高等数学 / Calculus ============ */
   {
     id: "g1", code: "MA1", moduleId: "m1", difficulty: 1, hours: 10, prereq: ["f2"],
@@ -482,7 +588,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "g2", code: "MA2", moduleId: "m1", difficulty: 2, hours: 12, prereq: ["g1"],
+    id: "g2", code: "MA2", moduleId: "m1", difficulty: 2, hours: 12, prereq: ["g1"], viz: "derivative",
     nExamples: 5, nExercises: 6,
     title: { zh: "导数与微分", en: "Derivatives & Differentials" },
     summary: {
@@ -504,7 +610,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "g3", code: "MA3", moduleId: "m1", difficulty: 2, hours: 14, prereq: ["g2"],
+    id: "g3", code: "MA3", moduleId: "m1", difficulty: 2, hours: 14, prereq: ["g2"], viz: "riemann",
     nExamples: 5, nExercises: 6,
     title: { zh: "积分", en: "Integration" },
     summary: {
@@ -527,7 +633,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "g4", code: "MA4", moduleId: "m1", difficulty: 3, hours: 12, prereq: ["g3"],
+    id: "g4", code: "MA4", moduleId: "m1", difficulty: 3, hours: 12, prereq: ["g3", "h4"],
     nExamples: 5, nExercises: 6,
     title: { zh: "无穷级数", en: "Infinite Series" },
     summary: {
@@ -664,7 +770,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "p2", code: "PS2", moduleId: "m3", difficulty: 2, hours: 12, prereq: ["p1", "g3"],
+    id: "p2", code: "PS2", moduleId: "m3", difficulty: 2, hours: 12, prereq: ["p1", "g3"], viz: "normal",
     nExamples: 5, nExercises: 6,
     title: { zh: "随机变量及其分布", en: "Random Variables & Distributions" },
     summary: {
@@ -1114,7 +1220,7 @@ const CHAPTERS = [
     ],
   },
   {
-    id: "k2", code: "OPT2", moduleId: "m8", difficulty: 3, hours: 12, prereq: ["k1"],
+    id: "k2", code: "OPT2", moduleId: "m8", difficulty: 3, hours: 12, prereq: ["k1"], viz: "gradient",
     nExamples: 5, nExercises: 6,
     title: { zh: "无约束最优化", en: "Unconstrained Optimization" },
     summary: {
