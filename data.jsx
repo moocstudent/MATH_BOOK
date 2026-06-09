@@ -9,6 +9,54 @@
 
 const MODULES = [
   {
+    id: "m9",
+    code: "F1",
+    zh: "数与式",
+    en: "Numbers & Expressions",
+    accent: "primary",
+    level: 1,
+    tagline: {
+      zh: "代数的地基:把数和式子玩熟。",
+      en: "The bedrock of algebra: get fluent with numbers and expressions.",
+    },
+    description: {
+      zh: "从有理数、比例与百分数,到整式、因式分解、分式与二次根式。这是初中代数的根,后面所有方程、函数都从这里长出来。",
+      en: "From rational numbers, ratios and percentages to polynomials, factoring, fractions and radicals. The root of middle-school algebra, from which every later equation and function grows.",
+    },
+  },
+  {
+    id: "m10",
+    code: "F2",
+    zh: "方程与不等式",
+    en: "Equations & Inequalities",
+    accent: "primary",
+    level: 1,
+    tagline: {
+      zh: "几元几次方程,还有不等式。",
+      en: "Equations of various kinds — and inequalities.",
+    },
+    description: {
+      zh: "一元一次方程、二元/三元一次方程组、一元二次方程,以及一元一次与一元二次不等式。把「未知数」从文字题里解出来。",
+      en: "Linear equations, systems in two or three unknowns, quadratic equations, and linear/quadratic inequalities. Solving for the unknown, from word problems to formulas.",
+    },
+  },
+  {
+    id: "m11",
+    code: "F3",
+    zh: "函数与几何",
+    en: "Functions & Geometry",
+    accent: "primary",
+    level: 2,
+    tagline: {
+      zh: "用函数看变化,用几何看形状。",
+      en: "Functions for change, geometry for shape.",
+    },
+    description: {
+      zh: "一次函数、二次函数,以及三角形、勾股定理、相似与圆。函数把代数与图象连起来,几何训练严谨推理——都是高中与大学数学的门槛。",
+      en: "Linear and quadratic functions, plus triangles, the Pythagorean theorem, similarity and circles. Functions tie algebra to graphs, geometry trains rigorous reasoning — both are the threshold to higher math.",
+    },
+  },
+  {
     id: "m1",
     code: "M1",
     zh: "高等数学",
@@ -139,9 +187,279 @@ const MODULES = [
 ];
 
 const CHAPTERS = [
+  /* ============ F1 数与式 / Numbers & Expressions ============ */
+  {
+    id: "n1", code: "NA1", moduleId: "m9", difficulty: 1, hours: 6, prereq: [],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "有理数与实数", en: "Rational & Real Numbers" },
+    summary: {
+      zh: "把数从自然数一路扩到实数,弄清相反数、绝对值与四则运算。",
+      en: "Extend numbers from the naturals to the reals; nail down opposites, absolute value and the four operations.",
+    },
+    objectives: [
+      { zh: "理解有理数与无理数的区别", en: "Distinguish rational from irrational numbers" },
+      { zh: "掌握相反数与绝对值", en: "Master opposites and absolute value" },
+      { zh: "熟练有理数的四则运算与乘方", en: "Compute fluently with the four operations and powers" },
+      { zh: "理解实数与数轴", en: "Understand the reals and the number line" },
+    ],
+    outline: [
+      { zh: "数的扩充:整数、有理数、实数", en: "Extending numbers: integers, rationals, reals" },
+      { zh: "相反数与绝对值", en: "Opposites and absolute value" },
+      { zh: "有理数的四则运算", en: "Arithmetic of rational numbers" },
+      { zh: "乘方与科学记数法", en: "Powers and scientific notation" },
+      { zh: "实数、数轴与估算", en: "Reals, the number line and estimation" },
+    ],
+  },
+  {
+    id: "n2", code: "NA2", moduleId: "m9", difficulty: 1, hours: 6, prereq: ["n1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "比、比例与百分数", en: "Ratio, Proportion & Percentage" },
+    summary: {
+      zh: "用比和比例描述「成倍数的关系」,并用百分数解决利率、折扣、浓度问题。",
+      en: "Describe proportional relationships with ratios, and use percentages for interest, discounts and concentration.",
+    },
+    objectives: [
+      { zh: "理解比与比例及其性质", en: "Understand ratios, proportions and their properties" },
+      { zh: "掌握百分数与百分点", en: "Master percentages and percentage points" },
+      { zh: "会按比例分配", en: "Divide quantities in a given ratio" },
+      { zh: "解决利率/折扣/浓度等应用题", en: "Solve interest, discount and mixture problems" },
+    ],
+    outline: [
+      { zh: "比与比的化简", en: "Ratios and simplifying ratios" },
+      { zh: "比例及其基本性质", en: "Proportions and their basic property" },
+      { zh: "百分数与百分点", en: "Percentages and percentage points" },
+      { zh: "按比例分配", en: "Proportional division" },
+      { zh: "应用:利率、折扣、浓度", en: "Applications: interest, discount, concentration" },
+    ],
+  },
+  {
+    id: "n3", code: "NA3", moduleId: "m9", difficulty: 1, hours: 8, prereq: ["n2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "整式与因式分解", en: "Polynomials & Factoring" },
+    summary: {
+      zh: "整式的运算与乘法公式,以及把多项式「拆成乘积」的因式分解。",
+      en: "Operations and special products for polynomials, and factoring — writing a polynomial as a product.",
+    },
+    objectives: [
+      { zh: "掌握整式的加减乘", en: "Add, subtract and multiply polynomials" },
+      { zh: "熟练幂的运算法则", en: "Apply the laws of exponents" },
+      { zh: "掌握平方差与完全平方公式", en: "Use the difference-of-squares and perfect-square formulas" },
+      { zh: "掌握常用因式分解方法", en: "Factor using the common techniques" },
+    ],
+    outline: [
+      { zh: "单项式、多项式与整式", en: "Monomials, polynomials and integral expressions" },
+      { zh: "幂的运算", en: "Laws of exponents" },
+      { zh: "整式乘法与乘法公式", en: "Polynomial multiplication and special products" },
+      { zh: "因式分解:提公因式", en: "Factoring: common factors" },
+      { zh: "因式分解:公式法与十字相乘", en: "Factoring: formulas and the cross method" },
+    ],
+  },
+  {
+    id: "n4", code: "NA4", moduleId: "m9", difficulty: 2, hours: 8, prereq: ["n3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "分式与二次根式", en: "Fractions & Radicals" },
+    summary: {
+      zh: "把代数式当分数和根号来运算:约分、通分、化简与分母有理化。",
+      en: "Compute with algebraic fractions and radicals: reduce, combine, simplify and rationalize.",
+    },
+    objectives: [
+      { zh: "掌握分式的基本性质与约分", en: "Master the basic property of fractions and reduction" },
+      { zh: "熟练分式的四则运算", en: "Compute with algebraic fractions" },
+      { zh: "掌握二次根式的化简与运算", en: "Simplify and compute with square roots" },
+      { zh: "会分母有理化", en: "Rationalize denominators" },
+    ],
+    outline: [
+      { zh: "分式及其基本性质", en: "Algebraic fractions and their basic property" },
+      { zh: "分式的运算", en: "Operations on fractions" },
+      { zh: "二次根式与化简", en: "Square roots and simplification" },
+      { zh: "根式的运算", en: "Operations on radicals" },
+      { zh: "分母有理化", en: "Rationalizing the denominator" },
+    ],
+  },
+
+  /* ============ F2 方程与不等式 / Equations & Inequalities ============ */
+  {
+    id: "e1", code: "EQ1", moduleId: "m10", difficulty: 1, hours: 6, prereq: ["n3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "一元一次方程", en: "Linear Equations in One Variable" },
+    summary: {
+      zh: "等式的性质、解方程的步骤,以及用方程把文字题翻译成数学。",
+      en: "Properties of equality, the steps to solve, and turning word problems into equations.",
+    },
+    objectives: [
+      { zh: "理解方程与等式的性质", en: "Understand equations and properties of equality" },
+      { zh: "掌握解一元一次方程的步骤", en: "Master the steps for solving linear equations" },
+      { zh: "会去分母、去括号、移项", en: "Clear denominators, brackets and transpose terms" },
+      { zh: "列方程解应用题", en: "Set up equations for word problems" },
+    ],
+    outline: [
+      { zh: "方程与等式的性质", en: "Equations and properties of equality" },
+      { zh: "解一元一次方程", en: "Solving a linear equation" },
+      { zh: "含分母的方程", en: "Equations with denominators" },
+      { zh: "列方程解应用题", en: "Modeling with equations" },
+      { zh: "行程、工程、和差倍问题", en: "Rate, work and part-whole problems" },
+    ],
+  },
+  {
+    id: "e2", code: "EQ2", moduleId: "m10", difficulty: 2, hours: 8, prereq: ["e1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "二元、三元一次方程组", en: "Systems of Linear Equations" },
+    summary: {
+      zh: "多个未知数、多个方程:用消元法把方程组化简、求解。",
+      en: "Several unknowns, several equations: solve a system by elimination.",
+    },
+    objectives: [
+      { zh: "理解二元一次方程组及其解", en: "Understand a system in two unknowns and its solution" },
+      { zh: "掌握代入消元法", en: "Master substitution" },
+      { zh: "掌握加减消元法", en: "Master elimination by addition" },
+      { zh: "会解三元一次方程组并应用", en: "Solve and apply three-variable systems" },
+    ],
+    outline: [
+      { zh: "二元一次方程与方程组", en: "Two-variable equations and systems" },
+      { zh: "代入消元法", en: "Solving by substitution" },
+      { zh: "加减消元法", en: "Solving by elimination" },
+      { zh: "三元一次方程组", en: "Three-variable systems" },
+      { zh: "方程组的应用", en: "Applications of systems" },
+    ],
+  },
+  {
+    id: "e3", code: "EQ3", moduleId: "m10", difficulty: 2, hours: 8, prereq: ["e1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "一元二次方程", en: "Quadratic Equations" },
+    summary: {
+      zh: "二次方程的四种解法、判别式,以及根与系数的韦达关系。",
+      en: "Four ways to solve a quadratic, the discriminant, and Vieta's relations between roots and coefficients.",
+    },
+    objectives: [
+      { zh: "掌握配方法、公式法、因式分解法", en: "Solve by completing the square, the formula and factoring" },
+      { zh: "理解判别式与根的情况", en: "Use the discriminant to count real roots" },
+      { zh: "掌握根与系数的关系(韦达)", en: "Master Vieta's formulas" },
+      { zh: "列一元二次方程解应用题", en: "Model problems with quadratics" },
+    ],
+    outline: [
+      { zh: "一元二次方程的概念", en: "What a quadratic equation is" },
+      { zh: "配方法", en: "Completing the square" },
+      { zh: "求根公式与判别式", en: "The quadratic formula and discriminant" },
+      { zh: "因式分解法", en: "Solving by factoring" },
+      { zh: "韦达定理与应用", en: "Vieta's formulas and applications" },
+    ],
+  },
+  {
+    id: "e4", code: "EQ4", moduleId: "m10", difficulty: 2, hours: 7, prereq: ["e1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "不等式与不等式组", en: "Inequalities" },
+    summary: {
+      zh: "不等式的性质,解一元一次/二次不等式,并在数轴上表示解集。",
+      en: "Properties of inequalities, solving linear and quadratic ones, and picturing solution sets on the number line.",
+    },
+    objectives: [
+      { zh: "掌握不等式的性质", en: "Master the properties of inequalities" },
+      { zh: "解一元一次不等式与不等式组", en: "Solve linear inequalities and systems" },
+      { zh: "解一元二次不等式", en: "Solve quadratic inequalities" },
+      { zh: "在数轴上表示解集", en: "Represent solution sets on the number line" },
+    ],
+    outline: [
+      { zh: "不等式及其性质", en: "Inequalities and their properties" },
+      { zh: "一元一次不等式", en: "Linear inequalities" },
+      { zh: "一元一次不等式组", en: "Systems of linear inequalities" },
+      { zh: "一元二次不等式", en: "Quadratic inequalities" },
+      { zh: "含绝对值的不等式初步", en: "A first look at absolute-value inequalities" },
+    ],
+  },
+
+  /* ============ F3 函数与几何 / Functions & Geometry ============ */
+  {
+    id: "f1", code: "FG1", moduleId: "m11", difficulty: 1, hours: 7, prereq: ["e1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "一次函数", en: "Linear Functions" },
+    summary: {
+      zh: "函数是「变量之间的对应」;一次函数是一条直线,k 和 b 决定它的样子。",
+      en: "A function is a correspondence between variables; a linear function is a line, shaped by its slope k and intercept b.",
+    },
+    objectives: [
+      { zh: "理解函数与函数图象", en: "Understand functions and their graphs" },
+      { zh: "掌握一次函数的图象与性质", en: "Master the graph and properties of a linear function" },
+      { zh: "用待定系数法求解析式", en: "Find the formula by undetermined coefficients" },
+      { zh: "理解一次函数与方程、不等式的联系", en: "Relate linear functions to equations and inequalities" },
+    ],
+    outline: [
+      { zh: "变量、函数与图象", en: "Variables, functions and graphs" },
+      { zh: "正比例函数", en: "Direct proportion" },
+      { zh: "一次函数的图象与性质(k、b)", en: "Graph and properties (slope and intercept)" },
+      { zh: "待定系数法求解析式", en: "Finding the formula" },
+      { zh: "一次函数与方程、不等式", en: "Links to equations and inequalities" },
+    ],
+  },
+  {
+    id: "f2", code: "FG2", moduleId: "m11", difficulty: 2, hours: 8, prereq: ["e3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "二次函数", en: "Quadratic Functions" },
+    summary: {
+      zh: "抛物线:顶点、对称轴与最值,以及它和一元二次方程的关系。",
+      en: "The parabola: vertex, axis of symmetry and extremum — and its link to the quadratic equation.",
+    },
+    objectives: [
+      { zh: "掌握二次函数的图象与性质", en: "Master the graph and properties of a quadratic" },
+      { zh: "会求顶点、对称轴与最值", en: "Find the vertex, axis and extreme value" },
+      { zh: "用配方与待定系数求解析式", en: "Find the formula by completing the square / coefficients" },
+      { zh: "理解二次函数与一元二次方程的关系", en: "Relate the parabola to the quadratic equation" },
+    ],
+    outline: [
+      { zh: "二次函数的图象(抛物线)", en: "The graph: a parabola" },
+      { zh: "顶点式与对称轴", en: "Vertex form and the axis of symmetry" },
+      { zh: "开口、增减性与最值", en: "Opening, monotonicity and extremum" },
+      { zh: "待定系数法", en: "Determining the coefficients" },
+      { zh: "二次函数与方程/不等式", en: "Links to equations and inequalities" },
+    ],
+  },
+  {
+    id: "f3", code: "FG3", moduleId: "m11", difficulty: 1, hours: 7, prereq: [],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "三角形与勾股定理", en: "Triangles & the Pythagorean Theorem" },
+    summary: {
+      zh: "三角形的边角关系、全等的判定,以及直角三角形的勾股定理。",
+      en: "Sides and angles of triangles, tests for congruence, and the Pythagorean theorem for right triangles.",
+    },
+    objectives: [
+      { zh: "掌握三角形的内角和与边角关系", en: "Master the angle sum and side–angle relations" },
+      { zh: "理解全等三角形的判定", en: "Understand the congruence tests" },
+      { zh: "掌握勾股定理及其逆定理", en: "Master the Pythagorean theorem and its converse" },
+      { zh: "了解等腰与等边三角形", en: "Know isosceles and equilateral triangles" },
+    ],
+    outline: [
+      { zh: "三角形的边角关系与内角和", en: "Sides, angles and the angle sum" },
+      { zh: "全等三角形的判定", en: "Congruence tests (SSS/SAS/ASA/AAS/HL)" },
+      { zh: "等腰与等边三角形", en: "Isosceles and equilateral triangles" },
+      { zh: "勾股定理", en: "The Pythagorean theorem" },
+      { zh: "勾股定理的逆定理与应用", en: "The converse and applications" },
+    ],
+  },
+  {
+    id: "f4", code: "FG4", moduleId: "m11", difficulty: 2, hours: 8, prereq: ["f3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "圆与相似", en: "Circles & Similarity" },
+    summary: {
+      zh: "相似三角形把「形状相同」量化,圆则有一套漂亮的角与线的定理。",
+      en: "Similar triangles quantify “same shape”; circles come with an elegant set of angle and line theorems.",
+    },
+    objectives: [
+      { zh: "掌握相似三角形的判定与性质", en: "Master the tests and properties of similar triangles" },
+      { zh: "理解平行线分线段成比例", en: "Understand the proportional-segments theorem" },
+      { zh: "掌握圆的基本性质与圆周角定理", en: "Master circle properties and the inscribed-angle theorem" },
+      { zh: "了解切线、弧长与扇形面积", en: "Know tangents, arc length and sector area" },
+    ],
+    outline: [
+      { zh: "相似三角形的判定与性质", en: "Tests and properties of similar triangles" },
+      { zh: "平行线分线段成比例", en: "Proportional segments from parallels" },
+      { zh: "圆的基本概念与性质", en: "Basic concepts and properties of circles" },
+      { zh: "圆周角定理", en: "The inscribed-angle theorem" },
+      { zh: "切线、弧长与扇形面积", en: "Tangents, arc length and sector area" },
+    ],
+  },
+
   /* ============ M1 高等数学 / Calculus ============ */
   {
-    id: "g1", code: "MA1", moduleId: "m1", difficulty: 1, hours: 10, prereq: [],
+    id: "g1", code: "MA1", moduleId: "m1", difficulty: 1, hours: 10, prereq: ["f2"],
     nExamples: 5, nExercises: 6,
     title: { zh: "极限与连续", en: "Limits & Continuity" },
     summary: {
@@ -233,7 +551,7 @@ const CHAPTERS = [
 
   /* ============ M2 线性代数 / Linear Algebra ============ */
   {
-    id: "a1", code: "LA1", moduleId: "m2", difficulty: 1, hours: 8, prereq: [],
+    id: "a1", code: "LA1", moduleId: "m2", difficulty: 1, hours: 8, prereq: ["e2"],
     nExamples: 5, nExercises: 6,
     title: { zh: "行列式", en: "Determinants" },
     summary: {
