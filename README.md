@@ -80,11 +80,13 @@ $$\int_0^1 x^2\,dx = \frac13$$
 > ```json
 > {
 >   "rules": {
->     "progress":      { "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" } },
->     "math_progress": { "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" } }
+>     "progress":       { "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" } },
+>     "math_progress":  { "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" } },
+>     "math_bookmarks": { "$uid": { ".read": "auth != null && auth.uid === $uid", ".write": "auth != null && auth.uid === $uid" } }
 >   }
 > }
 > ```
+> 进度(`math_progress`)与书签(`math_bookmarks`)用同一条规则即可。书签同样:游客存 localStorage,登录用户写 RTDB;没规则时写会被拒但不影响使用(优雅降级)。
 - 换成独立项目:编辑 `firebase-config.local.json` 填入新项目配置 → `node tools/encrypt-config.mjs` 重新生成 `firebase-config.enc.js` → 在 Firebase 控制台启用 Email/Password、加授权域名、配 RTDB 规则。
 - 线上部署后若没有本地口令文件,在控制台执行 `mathBookUnlock("口令")` 解锁一次即可(口令见 `firebase-key.local.js`,**gitignored**)。
 

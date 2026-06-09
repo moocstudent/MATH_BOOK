@@ -61,6 +61,46 @@ function useChapterContent(id, lang, enabled) {
 
 const other = (lang, obj) => (lang === "zh" ? obj.en : obj.zh);
 
+// ============== Bookmark ==============
+function secLabel(t, sec) {
+  return ({ intro: t("ch_sec_intro"), obj: t("ch_sec_obj"), outline: t("ch_sec_outline"), viz: t("ch_sec_viz"), notes: t("ch_sec_notes") })[sec] || "";
+}
+function fmtBmTime(ts, lang) {
+  try { return new Date(ts).toLocaleString(lang === "zh" ? "zh-CN" : "en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+  catch (e) { return ""; }
+}
+const BookmarkBox = ({ bm, onCapture, onNote, onRemove, onJump, user }) => {
+  const t = useT();
+  const lang = useLang();
+  const [note, setNote] = React.useState(bm ? (bm.note || "") : "");
+  React.useEffect(() => { setNote(bm ? (bm.note || "") : ""); }, [bm ? bm.ts : 0]);
+  if (!bm) {
+    return (
+      <div className="bm-box">
+        <button className="bm-add" onClick={onCapture}>{t("bm_add")}</button>
+        {!user && <div className="bm-guest">{t("bm_hint_guest")}</div>}
+      </div>
+    );
+  }
+  return (
+    <div className="bm-box has-bm">
+      <div className="bm-head">
+        <span className="bm-label">📑 {t("bm_section")}</span>
+        <span className="bm-time">{fmtBmTime(bm.ts, lang)}</span>
+      </div>
+      {bm.sec ? <div className="bm-at">{t("bm_at")}: {secLabel(t, bm.sec)}</div> : null}
+      <input className="bm-note" type="text" maxLength={80} placeholder={t("bm_note_ph")}
+        value={note} onChange={(e) => setNote(e.target.value)}
+        onBlur={() => onNote(note)} onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }} />
+      <div className="bm-actions">
+        <button className="bm-jump" onClick={onJump}>{t("bm_jump")}</button>
+        <button className="bm-upd" title={t("bm_update")} onClick={onCapture}>↻</button>
+        <button className="bm-rm" onClick={onRemove}>{t("bm_remove")}</button>
+      </div>
+    </div>
+  );
+};
+
 // ============== Ticker ==============
 const Ticker = () => {
   const lang = useLang();
@@ -83,7 +123,7 @@ const Ticker = () => {
 };
 
 // ============== HOME ==============
-const HomePage = ({ progress, nav, user, onLogin }) => {
+const HomePage = ({ progress, bookmarks, nav, user, onLogin }) => {
   const t = useT();
   const lang = useLang();
   const doneCount = Object.values(progress).filter(Boolean).length;
@@ -135,6 +175,36 @@ const HomePage = ({ progress, nav, user, onLogin }) => {
         </div>
         <div className="linebar"><div className="fill" style={{ width: `${pct}%` }} /></div>
       </section>
+
+      {(() => {
+        if (!bookmarks) return null;
+        const list = CHAPTERS.map((cc) => ({ cc, b: bookmarks[cc.id] })).filter((x) => x.b).sort((a, b) => (b.b.ts || 0) - (a.b.ts || 0));
+        if (!list.length) return null;
+        return (
+          <section className="section bm-resume-sect">
+            <div className="container">
+              <div className="sect-head">
+                <div className="num">§ 00 / BOOKMARKS</div>
+                <div className="title"><span className="cn">{t("home_resume")}</span></div>
+                <div className="aside">{t("home_resume_aside")}</div>
+              </div>
+              <div className="bm-resume-grid">
+                {list.map(({ cc, b }) => {
+                  const mm = MODULES.find((x) => x.id === cc.moduleId);
+                  return (
+                    <div key={cc.id} className="bm-resume-card" onClick={() => { window.__pendingBM = cc.id; nav("#/c/" + cc.id); }}>
+                      <div className="brc-code mono">{cc.code} · {mm ? pick(lang, mm) : ""}</div>
+                      <div className="brc-title">{pick(lang, cc.title)}</div>
+                      {b.note ? <div className="brc-note">“{b.note}”</div> : null}
+                      <div className="brc-foot mono"><span>{fmtBmTime(b.ts, lang)}</span><span className="brc-go">{t("bm_continue")}</span></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       <Ticker />
 
@@ -328,7 +398,7 @@ const ModulePage = ({ moduleId, progress, toggleProgress, nav, user, onLogin }) 
 };
 
 // ============== CHAPTER PAGE ==============
-const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin }) => {
+const ChapterPage = ({ courseId, progress, toggleProgress, bookmarks, setBookmark, removeBookmark, nav, user, onLogin }) => {
   const t = useT();
   const lang = useLang();
   const c = CHAPTERS.find((x) => x.id === courseId);
@@ -348,6 +418,22 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, [courseId]);
+
+  // Resume: when arriving from a home-page bookmark, scroll to its spot once content settles.
+  React.useEffect(() => {
+    if (!window.__pendingBM || window.__pendingBM !== courseId) return;
+    const b = bookmarks && bookmarks[courseId];
+    if (!b) { window.__pendingBM = null; return; }
+    if (!user || !content.loading) {
+      const id = courseId, pct = b.pct || 0;
+      setTimeout(() => {
+        if (window.__pendingBM !== id) return;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        window.scrollTo({ top: pct * max, behavior: "smooth" });
+        window.__pendingBM = null;
+      }, 400);
+    }
+  }, [courseId, content.loading, content.text]);
 
   if (!c) return <div className="container" style={{ padding: 80 }}>{t("not_found_ch")}</div>;
   const m = MODULES.find((mm) => mm.id === c.moduleId);
@@ -369,6 +455,19 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
   const ci = sibs.findIndex((x) => x.id === c.id);
   const prev = sibs[ci - 1];
   const next = sibs[ci + 1];
+
+  const bm = bookmarks ? bookmarks[c.id] : null;
+  const captureBM = () => {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+    setBookmark(c.id, { ts: Date.now(), pct, sec: activeSection });
+  };
+  const jumpBM = () => {
+    if (!bm) return;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: (bm.pct || 0) * max, behavior: "smooth" });
+  };
+  const setBMNote = (note) => setBookmark(c.id, { note });
 
   return (
     <div className="page">
@@ -489,6 +588,9 @@ const ChapterPage = ({ courseId, progress, toggleProgress, nav, user, onLogin })
               <span>{isDone ? `✓ ${t("marked_done")}` : `□ ${t("mark_done_btn")}`}</span>
               <span style={{ opacity: 0.6 }}>☁ Firebase</span>
             </button>
+
+            <BookmarkBox bm={bm} onCapture={captureBM} onNote={setBMNote}
+              onRemove={() => removeBookmark(c.id)} onJump={jumpBM} user={user} />
           </aside>
         </div>
       </div>

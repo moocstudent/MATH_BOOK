@@ -1717,3 +1717,32 @@ html[data-theme="dark"] .course-prose .katex { color: var(--ink); }
 .viz-readout sub { font-size: 0.8em; }
 .viz-caption { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 10px; font-family: var(--f-body); }
 @media (max-width: 640px) { .viz-slider { min-width: 120px; flex-basis: 120px; } .viz-controls { gap: 10px 14px; } }
+
+/* ============== Bookmarks (viz of reading position) ============== */
+.bm-box { margin-top: 16px; }
+.bm-add { width: 100%; padding: 12px 14px; border: 1px dashed var(--hairline-strong); background: transparent; color: var(--ink); font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; cursor: pointer; border-radius: 2px; }
+.bm-add:hover { border-color: var(--accent); color: var(--accent); }
+.bm-guest { font-family: var(--f-mono); font-size: 10px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+.bm-box.has-bm { border: 1px solid var(--accent); border-radius: 2px; padding: 12px; background: color-mix(in srgb, var(--accent) 7%, var(--bg)); }
+.bm-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bm-label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); }
+.bm-time, .bm-at { font-family: var(--f-mono); font-size: 10px; color: var(--muted); }
+.bm-at { margin-top: 4px; }
+.bm-note { width: 100%; margin-top: 8px; padding: 7px 9px; border: 1px solid var(--hairline-strong); background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 13px; border-radius: 2px; box-sizing: border-box; }
+.bm-note:focus { outline: none; border-color: var(--accent); }
+.bm-actions { display: flex; gap: 6px; margin-top: 8px; }
+.bm-actions button { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; padding: 6px 8px; border: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; border-radius: 1px; }
+.bm-jump { flex: 1; background: var(--ink); color: var(--bg); }
+.bm-jump:hover { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.bm-upd { width: 34px; }
+.bm-upd:hover, .bm-rm:hover { background: var(--surface); }
+.bm-rm:hover { color: var(--accent); border-color: var(--accent); }
+.bm-resume-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); }
+.bm-resume-card { padding: 18px 20px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); cursor: pointer; background: var(--bg); transition: background .15s; }
+.bm-resume-card:hover { background: var(--surface); }
+.brc-code { font-size: 10px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
+.brc-title { font-family: "Noto Serif SC", serif; font-size: 22px; font-weight: 500; margin-top: 8px; line-height: 1.2; }
+.brc-note { font-size: 14px; color: var(--ink-soft); font-style: italic; margin-top: 8px; }
+.brc-foot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 14px; font-size: 10px; letter-spacing: 0.08em; color: var(--muted); }
+.brc-go { color: var(--accent); }
+@media (max-width: 900px) { .bm-resume-grid { grid-template-columns: 1fr; } }

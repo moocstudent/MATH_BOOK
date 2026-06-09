@@ -163,6 +163,19 @@ const UI = {
   mark_done_btn:   { zh: "标记完成", en: "Mark as done" },
   marked_done:     { zh: "已完成", en: "Completed" },
 
+  /* ---- bookmarks ---- */
+  bm_section:      { zh: "书签", en: "Bookmark" },
+  bm_add:          { zh: "📑 在此处加书签", en: "📑 Bookmark this spot" },
+  bm_jump:         { zh: "↧ 跳到书签", en: "↧ Jump to spot" },
+  bm_update:       { zh: "更新到当前位置", en: "Update to current spot" },
+  bm_remove:       { zh: "移除", en: "Remove" },
+  bm_note_ph:      { zh: "记几个字(可选,如:看到换元法)", en: "A few words (optional)" },
+  bm_at:           { zh: "位置", en: "at" },
+  bm_hint_guest:   { zh: "提示:登录后书签可云端跨设备同步。", en: "Tip: log in to sync bookmarks across devices." },
+  home_resume:     { zh: "继续阅读", en: "Resume reading" },
+  home_resume_aside: { zh: "你的书签 · 点击跳回", en: "your bookmarks · click to jump back" },
+  bm_continue:     { zh: "继续 →", en: "Resume →" },
+
   /* difficulty labels */
   diff_1:          { zh: "入门", en: "Intro" },
   diff_2:          { zh: "基础", en: "Core" },

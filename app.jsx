@@ -84,6 +84,65 @@ function useProgress(user) {
   return [progress, toggle, reset];
 }
 
+// Bookmarks: at most one per chapter; value = { ts, pct, sec, note }.
+//  - logged in       → Firebase RTDB  /math_bookmarks/<uid>
+//  - guest / offline  → localStorage fallback
+function useBookmarks(user) {
+  const uid = user ? user.uid : null;
+  const [bookmarks, setBookmarks] = React.useState({});
+
+  React.useEffect(() => {
+    if (!uid) {
+      try { setBookmarks(JSON.parse(localStorage.getItem("math_bookmarks__guest")) || {}); }
+      catch (e) { setBookmarks({}); }
+      return;
+    }
+    let ref = null, handler = null, alive = true;
+    (async () => {
+      const ok = await window.__FIREBASE_READY__;
+      if (!alive) return;
+      if (!ok || typeof firebase === "undefined" || !firebase.database) {
+        try { setBookmarks(JSON.parse(localStorage.getItem("math_bookmarks__" + uid)) || {}); }
+        catch (e) { setBookmarks({}); }
+        return;
+      }
+      ref = firebase.database().ref("math_bookmarks/" + uid);
+      handler = ref.on("value",
+        (snap) => { if (alive) setBookmarks(snap.val() || {}); },
+        (err) => console.error("[bookmarks] read failed:", err && err.code, err && err.message));
+    })();
+    return () => { alive = false; if (ref && handler) ref.off("value", handler); };
+  }, [uid]);
+
+  const cloud = () => uid && typeof firebase !== "undefined" && firebase.database;
+  const saveLocal = (next) => { try { localStorage.setItem(uid ? "math_bookmarks__" + uid : "math_bookmarks__guest", JSON.stringify(next)); } catch (e) {} };
+
+  // patch is merged into the chapter's existing bookmark (create or update)
+  const setBookmark = (id, patch) => {
+    const merged = { ...(bookmarks[id] || {}), ...patch };
+    setBookmarks((p) => ({ ...p, [id]: merged }));
+    if (cloud()) {
+      firebase.database().ref("math_bookmarks/" + uid + "/" + id).set(merged)
+        .catch((e) => console.error("[bookmarks] write failed:", e && e.code));
+    } else {
+      saveLocal({ ...bookmarks, [id]: merged });
+    }
+  };
+
+  const removeBookmark = (id) => {
+    if (!bookmarks[id]) return;
+    setBookmarks((p) => { const next = { ...p }; delete next[id]; return next; });
+    if (cloud()) {
+      firebase.database().ref("math_bookmarks/" + uid + "/" + id).remove()
+        .catch((e) => console.error("[bookmarks] remove failed:", e && e.code));
+    } else {
+      const next = { ...bookmarks }; delete next[id]; saveLocal(next);
+    }
+  };
+
+  return [bookmarks, setBookmark, removeBookmark];
+}
+
 function useTheme() {
   const [theme, setTheme] = React.useState(() => {
     try { return localStorage.getItem(THEME_KEY) || "light"; } catch (e) { return "light"; }
@@ -110,7 +169,7 @@ const Nav = ({ progress, theme, toggleTheme, lang, toggleLang, nav, route, auth,
   return (
     <header className="nav">
       <div className="nav-brand" onClick={() => nav("#/")}>
-        <span className="mark">∑/16</span>
+        <span className="mark">∑</span>
         <span>self-taught.</span>
       </div>
       <nav className="nav-links">
@@ -169,7 +228,15 @@ const App = () => {
   const [lang, setLang, toggleLang] = useLangState();
   const auth = useAuth();
   const [progress, toggleProgress, resetProgress] = useProgress(auth.user);
+  const [bookmarks, setBookmark, removeBookmark] = useBookmarks(auth.user);
   const [theme, toggleTheme] = useTheme();
+
+  // Marking a chapter complete clears its bookmark (per the spec).
+  const markDone = (id) => {
+    const wasDone = !!progress[id];
+    toggleProgress(id);
+    if (!wasDone) removeBookmark(id);
+  };
 
   const [authModal, setAuthModal] = React.useState({ open: false, mode: "login", courseHint: null });
   const openLogin = (mode = "login", courseHint = null) => setAuthModal({ open: true, mode, courseHint });
@@ -196,9 +263,9 @@ const App = () => {
           nav={nav} route={route} auth={auth} onLogin={(mode) => openLogin(mode)} />
         <div className="running-label">{screenLabel} · self-taught math · 2026</div>
 
-        {route === "home" && <HomePage progress={progress} nav={nav} user={auth.user} onLogin={openLogin} />}
-        {route === "module" && <ModulePage moduleId={moduleId} progress={progress} toggleProgress={toggleProgress} nav={nav} user={auth.user} onLogin={openLogin} />}
-        {route === "course" && <ChapterPage courseId={courseId} progress={progress} toggleProgress={toggleProgress} nav={nav} user={auth.user} onLogin={openLogin} />}
+        {route === "home" && <HomePage progress={progress} bookmarks={bookmarks} nav={nav} user={auth.user} onLogin={openLogin} />}
+        {route === "module" && <ModulePage moduleId={moduleId} progress={progress} toggleProgress={markDone} nav={nav} user={auth.user} onLogin={openLogin} />}
+        {route === "course" && <ChapterPage courseId={courseId} progress={progress} toggleProgress={markDone} bookmarks={bookmarks} setBookmark={setBookmark} removeBookmark={removeBookmark} nav={nav} user={auth.user} onLogin={openLogin} />}
         {route === "about" && <AboutPage nav={nav} />}
 
         <AuthModal
