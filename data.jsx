@@ -78,7 +78,7 @@ const CHAPTERS = [
   /* ============ M1 高等数学 / Calculus ============ */
   {
     id: "g1", code: "MA1", moduleId: "m1", difficulty: 1, hours: 10, prereq: [],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "极限与连续", en: "Limits & Continuity" },
     summary: {
       zh: "用极限精确描述「无限接近」,并用它定义函数的连续性——整个微积分的起点。",
@@ -101,7 +101,7 @@ const CHAPTERS = [
   },
   {
     id: "g2", code: "MA2", moduleId: "m1", difficulty: 2, hours: 12, prereq: ["g1"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "导数与微分", en: "Derivatives & Differentials" },
     summary: {
       zh: "导数是瞬时变化率,微分是局部线性近似。掌握求导法则与几何意义。",
@@ -123,7 +123,7 @@ const CHAPTERS = [
   },
   {
     id: "g3", code: "MA3", moduleId: "m1", difficulty: 2, hours: 14, prereq: ["g2"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "积分", en: "Integration" },
     summary: {
       zh: "不定积分是求导的逆运算,定积分是累积求和的极限,微积分基本定理把两者连接。",
@@ -146,7 +146,7 @@ const CHAPTERS = [
   },
   {
     id: "g4", code: "MA4", moduleId: "m1", difficulty: 3, hours: 12, prereq: ["g3"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "无穷级数", en: "Infinite Series" },
     summary: {
       zh: "把函数展开成无穷多项之和:从收敛判别,到幂级数与泰勒展开。",
@@ -170,7 +170,7 @@ const CHAPTERS = [
   /* ============ M2 线性代数 / Linear Algebra ============ */
   {
     id: "a1", code: "LA1", moduleId: "m2", difficulty: 1, hours: 8, prereq: [],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "行列式", en: "Determinants" },
     summary: {
       zh: "行列式是一个把方阵映为数的函数,度量线性变换对体积的缩放,也判定可逆性。",
@@ -192,7 +192,7 @@ const CHAPTERS = [
   },
   {
     id: "a2", code: "LA2", moduleId: "m2", difficulty: 2, hours: 12, prereq: ["a1"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "矩阵及其运算", en: "Matrices & Operations" },
     summary: {
       zh: "矩阵是线性变换的坐标表示。掌握乘法、逆、转置与初等变换。",
@@ -214,7 +214,7 @@ const CHAPTERS = [
   },
   {
     id: "a3", code: "LA3", moduleId: "m2", difficulty: 2, hours: 12, prereq: ["a2"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "线性方程组与向量空间", en: "Linear Systems & Vector Spaces" },
     summary: {
       zh: "用秩与解的结构理解方程组,用向量空间、基与维数统一这一切。",
@@ -236,7 +236,7 @@ const CHAPTERS = [
   },
   {
     id: "a4", code: "LA4", moduleId: "m2", difficulty: 3, hours: 12, prereq: ["a3"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "特征值与特征向量", en: "Eigenvalues & Eigenvectors" },
     summary: {
       zh: "特征向量是变换中方向不变的向量。对角化把复杂的矩阵幂变简单。",
@@ -260,7 +260,7 @@ const CHAPTERS = [
   /* ============ M3 概率论与数理统计 / Probability & Statistics ============ */
   {
     id: "p1", code: "PS1", moduleId: "m3", difficulty: 1, hours: 10, prereq: [],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "随机事件与概率", en: "Events & Probability" },
     summary: {
       zh: "用样本空间与事件描述随机现象,用公理化概率、条件概率与贝叶斯公式做推断。",
@@ -283,7 +283,7 @@ const CHAPTERS = [
   },
   {
     id: "p2", code: "PS2", moduleId: "m3", difficulty: 2, hours: 12, prereq: ["p1", "g3"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "随机变量及其分布", en: "Random Variables & Distributions" },
     summary: {
       zh: "随机变量把结果数值化。掌握分布列、密度函数与常见分布。",
@@ -305,7 +305,7 @@ const CHAPTERS = [
   },
   {
     id: "p3", code: "PS3", moduleId: "m3", difficulty: 2, hours: 10, prereq: ["p2"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "期望、方差与协方差", en: "Expectation, Variance & Covariance" },
     summary: {
       zh: "用数字特征概括分布:期望刻画中心,方差刻画离散,协方差刻画相关。",
@@ -327,7 +327,7 @@ const CHAPTERS = [
   },
   {
     id: "p4", code: "PS4", moduleId: "m3", difficulty: 3, hours: 10, prereq: ["p3"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "大数定律与中心极限定理", en: "LLN & Central Limit Theorem" },
     summary: {
       zh: "为什么样本均值会稳定、为什么正态分布无处不在——两条极限定理给出答案。",
@@ -351,7 +351,7 @@ const CHAPTERS = [
   /* ============ M4 离散数学 / Discrete Mathematics ============ */
   {
     id: "d1", code: "DM1", moduleId: "m4", difficulty: 1, hours: 8, prereq: [],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "数理逻辑", en: "Mathematical Logic" },
     summary: {
       zh: "命题与谓词逻辑是严格推理的语法。掌握真值表、等价与推理规则。",
@@ -373,7 +373,7 @@ const CHAPTERS = [
   },
   {
     id: "d2", code: "DM2", moduleId: "m4", difficulty: 2, hours: 10, prereq: ["d1"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "集合与关系", en: "Sets & Relations" },
     summary: {
       zh: "集合是数学的通用语言;关系与函数刻画元素之间的联系,等价关系与偏序尤为重要。",
@@ -395,7 +395,7 @@ const CHAPTERS = [
   },
   {
     id: "d3", code: "DM3", moduleId: "m4", difficulty: 2, hours: 10, prereq: ["d2"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "图论基础", en: "Graph Theory" },
     summary: {
       zh: "用点和边为关系建模。掌握连通、路径、树与欧拉/哈密顿回路。",
@@ -417,7 +417,7 @@ const CHAPTERS = [
   },
   {
     id: "d4", code: "DM4", moduleId: "m4", difficulty: 3, hours: 10, prereq: ["d2"],
-    nExamples: 3, nExercises: 4,
+    nExamples: 5, nExercises: 6,
     title: { zh: "组合与数论初步", en: "Combinatorics & Number Theory" },
     summary: {
       zh: "计数的艺术与整数的结构:排列组合、容斥、同余与最大公约数。",
