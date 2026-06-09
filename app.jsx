@@ -116,8 +116,8 @@ const Nav = ({ progress, theme, toggleTheme, lang, toggleLang, nav, route, auth,
       <nav className="nav-links">
         <a className={route === "home" ? "active" : ""} onClick={() => nav("#/")}>{t("nav_home")}</a>
         {MODULES.map((m) => (
-          <a key={m.id} className={route === "module" && window.location.hash.includes(m.id) ? "active" : ""} onClick={() => nav(`#/m/${m.id}`)}>
-            {pick(lang, m)}
+          <a key={m.id} title={pick(lang, m)} className={route === "module" && window.location.hash.includes("/" + m.id) ? "active" : ""} onClick={() => nav(`#/m/${m.id}`)}>
+            {m.code}
           </a>
         ))}
         <a className={route === "about" ? "active" : ""} onClick={() => nav("#/about")}>{t("nav_about")}</a>

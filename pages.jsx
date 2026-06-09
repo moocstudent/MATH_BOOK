@@ -186,7 +186,7 @@ const HomePage = ({ progress, nav, user, onLogin }) => {
                     <span><strong>{done}</strong> / {cs.length} {t("done_word")}</span>
                     <span style={{ marginLeft: "auto" }}>{t("enter_word")}</span>
                   </div>
-                  <div className="corner">{["i", "ii", "iii", "iv"][mi]}</div>
+                  <div className="corner">{["i", "ii", "iii", "iv", "v", "vi", "vii", "viii"][mi]}</div>
                 </div>
               );
             })}
@@ -252,7 +252,7 @@ const ModulePage = ({ moduleId, progress, toggleProgress, nav, user, onLogin }) 
 
         <section style={{ padding: "48px 0 32px", position: "relative" }}>
           <div className="watermark fill" style={{ top: 20, right: -20, fontSize: "clamp(180px, 28vw, 380px)", opacity: isAccent ? 0.18 : 0.12, color: isAccent ? "var(--accent)" : "var(--ink)" }}>
-            {["I", "II", "III", "IV"][idx]}
+            {["I", "II", "III", "IV", "V", "VI", "VII", "VIII"][idx]}
           </div>
           <div className="mono" style={{ fontSize: 11, letterSpacing: "0.18em", color: "var(--muted)", position: "relative" }}>
             {t("module_word")} {m.code} · {idx + 1} {t("of_word")} {MODULES.length}

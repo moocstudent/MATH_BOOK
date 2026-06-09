@@ -72,6 +72,70 @@ const MODULES = [
       en: "Logic, sets and relations, graph theory, combinatorics and elementary number theory. The toolkit for discrete structures behind algorithms, cryptography and formal reasoning.",
     },
   },
+  {
+    id: "m5",
+    code: "M5",
+    zh: "常微分方程",
+    en: "Differential Equations",
+    accent: "primary",
+    level: 2,
+    tagline: {
+      zh: "用方程刻画「变化的规律」。",
+      en: "Equations that describe how things change.",
+    },
+    description: {
+      zh: "从一阶方程到高阶线性方程、方程组与拉普拉斯变换。微分方程把导数与未知函数联系起来,是物理、工程与建模的通用语言。",
+      en: "From first-order equations to higher-order linear ones, systems, and the Laplace transform. Differential equations link derivatives to an unknown function — the common language of physics, engineering and modeling.",
+    },
+  },
+  {
+    id: "m6",
+    code: "M6",
+    zh: "复变函数",
+    en: "Complex Analysis",
+    accent: "primary",
+    level: 3,
+    tagline: {
+      zh: "把微积分搬到复平面,世界忽然变简单。",
+      en: "Move calculus to the complex plane and the world gets simpler.",
+    },
+    description: {
+      zh: "复数与复变函数、解析函数与柯西-黎曼方程、复积分与柯西定理、级数与留数。解析性带来惊人的刚性,留数定理还能算实积分。",
+      en: "Complex numbers and functions, analytic functions and the Cauchy–Riemann equations, complex integration and Cauchy's theorem, series and residues. Analyticity brings startling rigidity — and residues even evaluate real integrals.",
+    },
+  },
+  {
+    id: "m7",
+    code: "M7",
+    zh: "数理统计",
+    en: "Mathematical Statistics",
+    accent: "primary",
+    level: 3,
+    tagline: {
+      zh: "从数据反推背后的概率规律。",
+      en: "Inferring the probability behind the data.",
+    },
+    description: {
+      zh: "抽样分布、参数估计、假设检验、回归与方差分析。概率论正向建模,统计反向推断——这是数据科学的方法论核心。",
+      en: "Sampling distributions, estimation, hypothesis testing, regression and ANOVA. Probability models forward; statistics infers backward — the methodological core of data science.",
+    },
+  },
+  {
+    id: "m8",
+    code: "M8",
+    zh: "最优化",
+    en: "Optimization",
+    accent: "accent",
+    level: 3,
+    tagline: {
+      zh: "在约束之下,找到最好的那个解。",
+      en: "Finding the best solution under constraints.",
+    },
+    description: {
+      zh: "凸集与凸函数、无约束与约束最优化、KKT 条件、线性规划与对偶。几乎所有「学习」与「决策」问题,最终都化归为一个最优化问题。",
+      en: "Convex sets and functions, unconstrained and constrained optimization, the KKT conditions, linear programming and duality. Almost every learning or decision problem reduces, in the end, to an optimization problem.",
+    },
+  },
 ];
 
 const CHAPTERS = [
@@ -435,6 +499,366 @@ const CHAPTERS = [
       { zh: "容斥原理与鸽巢原理", en: "Inclusion–exclusion and pigeonhole" },
       { zh: "整除与最大公约数", en: "Divisibility and gcd" },
       { zh: "同余与模运算", en: "Congruences and modular arithmetic" },
+    ],
+  },
+
+  /* ============ M5 常微分方程 / Differential Equations ============ */
+  {
+    id: "o1", code: "ODE1", moduleId: "m5", difficulty: 2, hours: 10, prereq: ["g3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "一阶微分方程", en: "First-Order ODEs" },
+    summary: {
+      zh: "识别方程类型并选对解法:可分离变量、齐次、一阶线性与伯努利方程。",
+      en: "Recognize the type and pick the method: separable, homogeneous, linear and Bernoulli equations.",
+    },
+    objectives: [
+      { zh: "理解微分方程的阶、解与通解/特解", en: "Understand order, solutions, and general vs particular solutions" },
+      { zh: "掌握可分离变量与齐次方程", en: "Solve separable and homogeneous equations" },
+      { zh: "掌握一阶线性方程的积分因子法", en: "Use the integrating factor for first-order linear ODEs" },
+      { zh: "了解伯努利方程与初值问题", en: "Know Bernoulli equations and initial-value problems" },
+    ],
+    outline: [
+      { zh: "基本概念:阶、解、通解", en: "Basics: order, solutions, general solution" },
+      { zh: "可分离变量方程", en: "Separable equations" },
+      { zh: "齐次方程", en: "Homogeneous equations" },
+      { zh: "一阶线性方程与积分因子", en: "Linear equations and integrating factors" },
+      { zh: "伯努利方程与初值问题", en: "Bernoulli equations and IVPs" },
+    ],
+  },
+  {
+    id: "o2", code: "ODE2", moduleId: "m5", difficulty: 2, hours: 12, prereq: ["o1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "高阶线性微分方程", en: "Higher-Order Linear ODEs" },
+    summary: {
+      zh: "线性方程解的结构 = 齐次通解 + 一个特解;常系数情形靠特征方程。",
+      en: "A linear ODE's solution = homogeneous general solution + one particular solution; constant coefficients hinge on the characteristic equation.",
+    },
+    objectives: [
+      { zh: "理解线性微分方程解的结构与叠加原理", en: "Understand solution structure and superposition" },
+      { zh: "用特征方程求常系数齐次方程通解", en: "Solve constant-coefficient homogeneous ODEs via the characteristic equation" },
+      { zh: "处理复根与重根情形", en: "Handle complex and repeated roots" },
+      { zh: "用待定系数法/常数变易法求特解", en: "Find particular solutions by undetermined coefficients / variation of parameters" },
+    ],
+    outline: [
+      { zh: "线性方程解的结构", en: "Structure of the solution" },
+      { zh: "常系数齐次方程与特征方程", en: "Constant-coefficient homogeneous equations" },
+      { zh: "复根与重根", en: "Complex and repeated roots" },
+      { zh: "待定系数法", en: "Method of undetermined coefficients" },
+      { zh: "常数变易法", en: "Variation of parameters" },
+    ],
+  },
+  {
+    id: "o3", code: "ODE3", moduleId: "m5", difficulty: 3, hours: 12, prereq: ["o2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "微分方程组与相平面", en: "Systems & the Phase Plane" },
+    summary: {
+      zh: "把高阶方程化为一阶方程组,用特征值法求解,并在相平面上看稳定性。",
+      en: "Turn higher-order equations into first-order systems, solve by eigenvalues, and read stability off the phase plane.",
+    },
+    objectives: [
+      { zh: "把高阶方程化为一阶方程组", en: "Convert higher-order equations to first-order systems" },
+      { zh: "用特征值-特征向量解线性常系数方程组", en: "Solve linear constant-coefficient systems via eigenvalues" },
+      { zh: "理解相平面、轨线与平衡点", en: "Understand the phase plane, trajectories and equilibria" },
+      { zh: "判断平衡点的类型与稳定性", en: "Classify equilibria and their stability" },
+    ],
+    outline: [
+      { zh: "一阶线性方程组", en: "First-order linear systems" },
+      { zh: "特征值-特征向量解法", en: "The eigenvalue method" },
+      { zh: "相平面与轨线", en: "Phase plane and trajectories" },
+      { zh: "平衡点的分类与稳定性", en: "Classification and stability of equilibria" },
+      { zh: "线性化与应用", en: "Linearization and applications" },
+    ],
+  },
+  {
+    id: "o4", code: "ODE4", moduleId: "m5", difficulty: 3, hours: 10, prereq: ["o2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "拉普拉斯变换", en: "The Laplace Transform" },
+    summary: {
+      zh: "把微分方程变成代数方程:变换、求解、再逆变换回去。",
+      en: "Turn a differential equation into an algebraic one: transform, solve, then invert.",
+    },
+    objectives: [
+      { zh: "掌握拉普拉斯变换的定义与基本性质", en: "Master the definition and key properties of the Laplace transform" },
+      { zh: "用变换把初值问题化为代数方程", en: "Reduce IVPs to algebraic equations via the transform" },
+      { zh: "掌握逆变换与部分分式", en: "Invert transforms using partial fractions" },
+      { zh: "处理阶跃函数与冲激", en: "Handle step functions and impulses" },
+    ],
+    outline: [
+      { zh: "定义与存在性", en: "Definition and existence" },
+      { zh: "基本性质(线性、微分、位移)", en: "Key properties (linearity, derivative, shift)" },
+      { zh: "逆变换与部分分式", en: "Inverse transform and partial fractions" },
+      { zh: "求解初值问题", en: "Solving initial-value problems" },
+      { zh: "阶跃函数与 δ 函数", en: "Step and delta functions" },
+    ],
+  },
+
+  /* ============ M6 复变函数 / Complex Analysis ============ */
+  {
+    id: "z1", code: "CA1", moduleId: "m6", difficulty: 2, hours: 8, prereq: ["g2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "复数与复变函数", en: "Complex Numbers & Functions" },
+    summary: {
+      zh: "复数的代数与几何、欧拉公式,以及复变函数作为复平面之间的映射。",
+      en: "The algebra and geometry of complex numbers, Euler's formula, and complex functions as maps between planes.",
+    },
+    objectives: [
+      { zh: "熟练复数的模、辐角与运算", en: "Work fluently with modulus, argument and operations" },
+      { zh: "掌握欧拉公式与复指数", en: "Master Euler's formula and the complex exponential" },
+      { zh: "理解复对数与复幂的多值性", en: "Understand the multivaluedness of complex log and powers" },
+      { zh: "把复变函数看成映射", en: "See a complex function as a mapping" },
+    ],
+    outline: [
+      { zh: "复数及其几何表示", en: "Complex numbers and their geometry" },
+      { zh: "欧拉公式与复指数", en: "Euler's formula and the complex exponential" },
+      { zh: "复对数与复幂", en: "Complex logarithm and powers" },
+      { zh: "复变函数与映射", en: "Complex functions and mappings" },
+      { zh: "极限与连续", en: "Limits and continuity" },
+    ],
+  },
+  {
+    id: "z2", code: "CA2", moduleId: "m6", difficulty: 3, hours: 10, prereq: ["z1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "解析函数", en: "Analytic Functions" },
+    summary: {
+      zh: "复可导比实可导强得多:柯西-黎曼方程,以及解析与调和的联系。",
+      en: "Complex differentiability is far stronger than real: the Cauchy–Riemann equations and the link to harmonic functions.",
+    },
+    objectives: [
+      { zh: "区分复可导与解析", en: "Distinguish complex-differentiable from analytic" },
+      { zh: "掌握柯西-黎曼方程", en: "Master the Cauchy–Riemann equations" },
+      { zh: "理解调和函数与共轭调和", en: "Understand harmonic and conjugate-harmonic functions" },
+      { zh: "熟悉初等解析函数", en: "Know the elementary analytic functions" },
+    ],
+    outline: [
+      { zh: "复导数与可导性", en: "The complex derivative" },
+      { zh: "柯西-黎曼方程", en: "The Cauchy–Riemann equations" },
+      { zh: "解析函数的定义与判定", en: "Analytic functions: definition and tests" },
+      { zh: "调和函数与共轭调和函数", en: "Harmonic and conjugate-harmonic functions" },
+      { zh: "初等解析函数", en: "Elementary analytic functions" },
+    ],
+  },
+  {
+    id: "z3", code: "CA3", moduleId: "m6", difficulty: 3, hours: 12, prereq: ["z2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "复积分与柯西定理", en: "Complex Integration & Cauchy's Theorem" },
+    summary: {
+      zh: "解析函数沿闭路的积分为零,而柯西积分公式让函数值由边界决定。",
+      en: "An analytic function integrates to zero around a loop, and Cauchy's formula fixes interior values from the boundary.",
+    },
+    objectives: [
+      { zh: "掌握复积分的定义与计算", en: "Compute complex line integrals" },
+      { zh: "理解柯西-古萨基本定理", en: "Understand the Cauchy–Goursat theorem" },
+      { zh: "掌握柯西积分公式", en: "Master the Cauchy integral formula" },
+      { zh: "了解解析函数的高阶导数公式", en: "Know the formula for higher derivatives" },
+    ],
+    outline: [
+      { zh: "复积分的定义与性质", en: "Complex integrals: definition and properties" },
+      { zh: "柯西-古萨基本定理", en: "The Cauchy–Goursat theorem" },
+      { zh: "复合闭路与路径变形", en: "Composite contours and deformation" },
+      { zh: "柯西积分公式", en: "The Cauchy integral formula" },
+      { zh: "解析函数的无穷可导性", en: "Infinite differentiability of analytic functions" },
+    ],
+  },
+  {
+    id: "z4", code: "CA4", moduleId: "m6", difficulty: 3, hours: 12, prereq: ["z3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "级数与留数", en: "Series & Residues" },
+    summary: {
+      zh: "洛朗级数刻画奇点,留数定理把围道积分变成「数留数」,还能算实积分。",
+      en: "Laurent series capture singularities; the residue theorem turns contour integrals into summing residues — and even evaluates real integrals.",
+    },
+    objectives: [
+      { zh: "掌握泰勒与洛朗级数展开", en: "Master Taylor and Laurent expansions" },
+      { zh: "识别孤立奇点的类型", en: "Classify isolated singularities" },
+      { zh: "掌握留数定理", en: "Master the residue theorem" },
+      { zh: "会用留数计算实积分", en: "Evaluate real integrals via residues" },
+    ],
+    outline: [
+      { zh: "复级数与泰勒展开", en: "Complex series and Taylor expansion" },
+      { zh: "洛朗级数", en: "Laurent series" },
+      { zh: "孤立奇点的分类", en: "Classifying isolated singularities" },
+      { zh: "留数与留数定理", en: "Residues and the residue theorem" },
+      { zh: "用留数计算实积分", en: "Real integrals via residues" },
+    ],
+  },
+
+  /* ============ M7 数理统计 / Mathematical Statistics ============ */
+  {
+    id: "s1", code: "MS1", moduleId: "m7", difficulty: 2, hours: 10, prereq: ["p4"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "抽样与抽样分布", en: "Sampling & Sampling Distributions" },
+    summary: {
+      zh: "样本、统计量,以及由正态总体导出的 χ²、t、F 三大抽样分布。",
+      en: "Samples, statistics, and the three sampling distributions from a normal population: χ², t and F.",
+    },
+    objectives: [
+      { zh: "理解总体、样本与统计量", en: "Understand population, sample and statistic" },
+      { zh: "掌握样本均值与样本方差的性质", en: "Know the properties of the sample mean and variance" },
+      { zh: "认识 χ²、t、F 分布", en: "Recognize the χ², t and F distributions" },
+      { zh: "掌握正态总体的抽样分布定理", en: "Master the sampling theorems for a normal population" },
+    ],
+    outline: [
+      { zh: "总体与样本", en: "Population and sample" },
+      { zh: "统计量与经验分布", en: "Statistics and the empirical distribution" },
+      { zh: "χ² 分布", en: "The χ² distribution" },
+      { zh: "t 分布与 F 分布", en: "The t and F distributions" },
+      { zh: "正态总体的抽样分布", en: "Sampling distributions for a normal population" },
+    ],
+  },
+  {
+    id: "s2", code: "MS2", moduleId: "m7", difficulty: 3, hours: 12, prereq: ["s1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "参数估计", en: "Parameter Estimation" },
+    summary: {
+      zh: "用样本估计未知参数:矩估计、极大似然,以及带置信度的区间估计。",
+      en: "Estimate unknown parameters from data: moments, maximum likelihood, and confidence intervals.",
+    },
+    objectives: [
+      { zh: "掌握矩估计与极大似然估计", en: "Master the method of moments and MLE" },
+      { zh: "理解无偏性、有效性与相合性", en: "Understand unbiasedness, efficiency and consistency" },
+      { zh: "掌握区间估计与置信区间", en: "Master interval estimation and confidence intervals" },
+      { zh: "会做正态总体参数的区间估计", en: "Build CIs for normal-population parameters" },
+    ],
+    outline: [
+      { zh: "点估计:矩估计法", en: "Point estimation: method of moments" },
+      { zh: "极大似然估计", en: "Maximum likelihood estimation" },
+      { zh: "估计量的评价标准", en: "Criteria for estimators" },
+      { zh: "区间估计与置信区间", en: "Interval estimation and confidence intervals" },
+      { zh: "正态总体参数的区间估计", en: "CIs for normal-population parameters" },
+    ],
+  },
+  {
+    id: "s3", code: "MS3", moduleId: "m7", difficulty: 3, hours: 12, prereq: ["s2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "假设检验", en: "Hypothesis Testing" },
+    summary: {
+      zh: "用数据对一个命题做出「拒绝/不拒绝」的判断,并权衡两类错误。",
+      en: "Decide whether to reject a claim from data, weighing the two kinds of error.",
+    },
+    objectives: [
+      { zh: "理解假设检验的逻辑与两类错误", en: "Understand the logic of testing and the two error types" },
+      { zh: "掌握正态总体均值/方差的检验", en: "Test the mean and variance of a normal population" },
+      { zh: "理解 p 值与显著性水平", en: "Understand p-values and significance levels" },
+      { zh: "了解拟合优度与独立性检验", en: "Know goodness-of-fit and independence tests" },
+    ],
+    outline: [
+      { zh: "假设检验的基本思想", en: "The idea of hypothesis testing" },
+      { zh: "两类错误与检验功效", en: "Two error types and power" },
+      { zh: "均值的检验(u/t 检验)", en: "Tests for the mean (z/t tests)" },
+      { zh: "方差的检验(χ²/F 检验)", en: "Tests for variance (χ²/F tests)" },
+      { zh: "拟合优度与独立性检验", en: "Goodness-of-fit and independence tests" },
+    ],
+  },
+  {
+    id: "s4", code: "MS4", moduleId: "m7", difficulty: 3, hours: 10, prereq: ["s3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "回归与方差分析", en: "Regression & ANOVA" },
+    summary: {
+      zh: "用最小二乘拟合关系,用方差分析比较多组均值。",
+      en: "Fit relationships by least squares; compare several group means with ANOVA.",
+    },
+    objectives: [
+      { zh: "掌握一元线性回归与最小二乘", en: "Master simple linear regression and least squares" },
+      { zh: "理解回归系数的检验与预测", en: "Test regression coefficients and make predictions" },
+      { zh: "理解相关系数", en: "Understand the correlation coefficient" },
+      { zh: "掌握单因素方差分析", en: "Master one-way ANOVA" },
+    ],
+    outline: [
+      { zh: "一元线性回归模型", en: "The simple linear regression model" },
+      { zh: "最小二乘估计", en: "Least-squares estimation" },
+      { zh: "回归的显著性检验", en: "Significance tests for regression" },
+      { zh: "预测与相关", en: "Prediction and correlation" },
+      { zh: "单因素方差分析", en: "One-way ANOVA" },
+    ],
+  },
+
+  /* ============ M8 最优化 / Optimization ============ */
+  {
+    id: "k1", code: "OPT1", moduleId: "m8", difficulty: 2, hours: 10, prereq: ["a3"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "凸集与凸函数", en: "Convex Sets & Functions" },
+    summary: {
+      zh: "凸性是最优化「好解」的根源:凸问题里局部最优就是全局最优。",
+      en: "Convexity is what makes optimization tractable: in a convex problem, local optima are global.",
+    },
+    objectives: [
+      { zh: "掌握凸集与凸函数的定义与判定", en: "Master definitions and tests for convex sets and functions" },
+      { zh: "理解凸性与全局最优的关系", en: "Understand why convexity yields global optimality" },
+      { zh: "掌握一阶/二阶凸性判据", en: "Use first- and second-order convexity criteria" },
+      { zh: "了解保凸运算", en: "Know convexity-preserving operations" },
+    ],
+    outline: [
+      { zh: "凸集与凸组合", en: "Convex sets and combinations" },
+      { zh: "凸函数的定义", en: "Definition of a convex function" },
+      { zh: "一阶与二阶判定条件", en: "First- and second-order conditions" },
+      { zh: "保凸运算", en: "Operations that preserve convexity" },
+      { zh: "凸优化问题的标准形", en: "The standard form of a convex program" },
+    ],
+  },
+  {
+    id: "k2", code: "OPT2", moduleId: "m8", difficulty: 3, hours: 12, prereq: ["k1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "无约束最优化", en: "Unconstrained Optimization" },
+    summary: {
+      zh: "用梯度找下降方向,用一阶/二阶条件判最优:梯度下降与牛顿法。",
+      en: "Descend along the gradient, certify optima by first/second-order conditions: gradient descent and Newton's method.",
+    },
+    objectives: [
+      { zh: "掌握最优性的一阶/二阶条件", en: "Master first- and second-order optimality conditions" },
+      { zh: "理解梯度下降及其收敛", en: "Understand gradient descent and its convergence" },
+      { zh: "掌握牛顿法与拟牛顿思想", en: "Know Newton and quasi-Newton methods" },
+      { zh: "了解线搜索与步长选择", en: "Understand line search and step sizes" },
+    ],
+    outline: [
+      { zh: "最优性条件", en: "Optimality conditions" },
+      { zh: "梯度下降法", en: "Gradient descent" },
+      { zh: "步长与线搜索", en: "Step size and line search" },
+      { zh: "牛顿法与拟牛顿法", en: "Newton and quasi-Newton methods" },
+      { zh: "收敛性与条件数", en: "Convergence and conditioning" },
+    ],
+  },
+  {
+    id: "k3", code: "OPT3", moduleId: "m8", difficulty: 3, hours: 12, prereq: ["k2"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "约束最优化与 KKT", en: "Constrained Optimization & KKT" },
+    summary: {
+      zh: "拉格朗日乘子与 KKT 条件,把约束问题的最优性刻画清楚。",
+      en: "Lagrange multipliers and the KKT conditions characterize optimality under constraints.",
+    },
+    objectives: [
+      { zh: "掌握拉格朗日乘子法", en: "Master the method of Lagrange multipliers" },
+      { zh: "理解 KKT 条件", en: "Understand the KKT conditions" },
+      { zh: "了解拉格朗日对偶与强/弱对偶", en: "Know Lagrangian duality and weak/strong duality" },
+      { zh: "会建立并分析约束问题", en: "Formulate and analyze constrained problems" },
+    ],
+    outline: [
+      { zh: "等式约束与拉格朗日乘子", en: "Equality constraints and Lagrange multipliers" },
+      { zh: "不等式约束", en: "Inequality constraints" },
+      { zh: "KKT 条件", en: "The KKT conditions" },
+      { zh: "拉格朗日对偶", en: "Lagrangian duality" },
+      { zh: "对偶间隙与强对偶", en: "Duality gap and strong duality" },
+    ],
+  },
+  {
+    id: "k4", code: "OPT4", moduleId: "m8", difficulty: 3, hours: 10, prereq: ["k1"],
+    nExamples: 5, nExercises: 6,
+    title: { zh: "线性规划与对偶", en: "Linear Programming & Duality" },
+    summary: {
+      zh: "在多面体的顶点上找最优:单纯形法,以及优雅的 LP 对偶。",
+      en: "Optimize over the vertices of a polyhedron: the simplex method and the elegant LP duality.",
+    },
+    objectives: [
+      { zh: "掌握线性规划的标准形与几何", en: "Master the standard form and geometry of LP" },
+      { zh: "理解单纯形法的思想", en: "Understand the idea of the simplex method" },
+      { zh: "掌握 LP 对偶与互补松弛", en: "Master LP duality and complementary slackness" },
+      { zh: "了解灵敏度与整数规划简介", en: "Know sensitivity analysis and a glimpse of integer programming" },
+    ],
+    outline: [
+      { zh: "线性规划的标准形", en: "Standard form of LP" },
+      { zh: "可行域与基本可行解", en: "Feasible region and basic feasible solutions" },
+      { zh: "单纯形法", en: "The simplex method" },
+      { zh: "对偶问题", en: "The dual problem" },
+      { zh: "互补松弛与灵敏度", en: "Complementary slackness and sensitivity" },
     ],
   },
 ];

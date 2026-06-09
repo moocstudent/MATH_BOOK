@@ -28,11 +28,11 @@ const Roadmap = ({ progress, onCourseClick, height = 480 }) => {
   }
 
   const W = 1280;
-  const H = height;
   const padL = 170;
   const padR = 70;
   const trackGap = 92;
   const top = 70;
+  const H = Math.max(height, top + (byMod.length - 1) * trackGap + 140);
   const cols = 4;
   const colSpan = (W - padL - padR) / (cols - 1);
 
@@ -145,7 +145,7 @@ const Roadmap = ({ progress, onCourseClick, height = 480 }) => {
         )}
 
         {/* Bottom legend / axis */}
-        <g transform={`translate(0, ${top + 3 * trackGap + 90})`}>
+        <g transform={`translate(0, ${top + (byMod.length - 1) * trackGap + 90})`}>
           <line x1={padL} y1="0" x2={W - padR} y2="0" stroke="var(--hairline-strong)" strokeWidth="1" />
           {[t("rm_axis_1"), t("rm_axis_2"), t("rm_axis_3"), t("rm_axis_4")].map((label, i) => {
             const x = padL + i * colSpan;
