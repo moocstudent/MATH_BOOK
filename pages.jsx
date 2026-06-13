@@ -9,11 +9,22 @@ function renderMarkdownWithMath(md) {
   if (!md) return "";
   if (typeof marked === "undefined") return md.replace(/\n/g, "<br>");
   const store = [];
-  let s = md.replace(/\$\$([\s\S]+?)\$\$/g, (mm) => { store.push(mm); return "@@MATH" + (store.length - 1) + "@@"; });
+  // Protect escaped dollars (\$ = literal currency, e.g. "\$8") so they aren't math delimiters.
+  let s = md.replace(/\\\$/g, "@@DLR@@");
+  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (mm) => { store.push(mm); return "@@MATH" + (store.length - 1) + "@@"; });
   s = s.replace(/\$([^\$\n]+?)\$/g, (mm) => { store.push(mm); return "@@MATH" + (store.length - 1) + "@@"; });
   let html;
   try { html = marked.parse(s); } catch (e) { html = s; }
-  html = html.replace(/@@MATH(\d+)@@/g, (_, i) => store[+i] !== undefined ? store[+i] : "");
+  // Restore math, HTML-escaping <, >, & so the browser doesn't parse them as
+  // tags/entities (e.g. -\infty<x<\infty, 0<a<1, or the & in \begin{aligned}).
+  // KaTeX reads textContent (entities decoded), so it still gets the raw chars.
+  html = html.replace(/@@MATH(\d+)@@/g, (_, i) => {
+    const m = store[+i];
+    if (m === undefined) return "";
+    return m.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  });
+  // Restore currency $ inside a span KaTeX skips, so it never pairs as a delimiter.
+  html = html.replace(/@@DLR@@/g, () => '<span class="nomath">$</span>');
   return html;
 }
 
@@ -33,6 +44,7 @@ const Prose = ({ md, className }) => {
           ],
           throwOnError: false,
           errorColor: "#c0392b",
+          ignoredClasses: ["nomath"],
         });
       } catch (e) {}
     }
