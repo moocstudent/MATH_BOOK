@@ -385,7 +385,7 @@ const CHAPTERS = [
 
   /* ============ F3 函数与几何 / Functions & Geometry ============ */
   {
-    id: "f1", code: "FG1", moduleId: "m11", difficulty: 1, hours: 7, prereq: ["e1"], viz: "linear",
+    id: "f1", code: "FG1", moduleId: "m11", difficulty: 1, hours: 7, prereq: ["e1"], viz: ["proportion", "proportionRatio", "proportionRealWorld", "proportionThroughPoint", "proportionFamily", "linear"],
     nExamples: 5, nExercises: 6,
     title: { zh: "一次函数", en: "Linear Functions" },
     summary: {

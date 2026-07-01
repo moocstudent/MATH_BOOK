@@ -1698,6 +1698,9 @@ html[data-theme="dark"] .course-prose .katex { color: var(--ink); }
 
 /* ============== Interactive viz (viz.jsx) ============== */
 .viz { margin: 8px 0 4px; }
+.viz + .viz { margin-top: 30px; padding-top: 26px; border-top: 1px dashed var(--hairline-strong); }
+.viz-title { display: flex; align-items: baseline; gap: 10px; font-family: Noto Serif SC, serif; font-size: 17px; color: var(--ink); margin: 0 0 12px; }
+.viz-title-idx { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; color: var(--accent); }
 .viz-canvas { border: 1px solid var(--ink); background: var(--bg); border-radius: 2px; touch-action: pan-y; }
 .viz-controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin: 14px 0 4px; }
 .viz-slider { display: flex; flex-direction: column; gap: 4px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--muted); min-width: 150px; flex: 1 1 150px; }

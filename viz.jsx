@@ -420,7 +420,187 @@ function TrigDemo() {
   );
 }
 
+/* ============ direct proportion y = kx (through origin) ============ */
+function ProportionDemo() {
+  const lang = useLang();
+  const [k, setK] = React.useState(1.5);
+  const xr = [-6, 6], yr = [-6, 6];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    // Shade the two quadrants the line lives in: k>0 → I & III, k<0 → II & IV.
+    ctx.save(); ctx.globalAlpha = 0.09; ctx.fillStyle = k >= 0 ? c.accent : c.primary;
+    if (k >= 0) {
+      ctx.fillRect(ax.X(0), ax.Y(yr[1]), ax.X(xr[1]) - ax.X(0), ax.Y(0) - ax.Y(yr[1]));   // Q I
+      ctx.fillRect(ax.X(xr[0]), ax.Y(0), ax.X(0) - ax.X(xr[0]), ax.Y(yr[0]) - ax.Y(0));    // Q III
+    } else {
+      ctx.fillRect(ax.X(xr[0]), ax.Y(yr[1]), ax.X(0) - ax.X(xr[0]), ax.Y(0) - ax.Y(yr[1])); // Q II
+      ctx.fillRect(ax.X(0), ax.Y(0), ax.X(xr[1]) - ax.X(0), ax.Y(yr[0]) - ax.Y(0));         // Q IV
+    }
+    ctx.restore();
+    // the line y = kx
+    plotFn(ctx, ax, (x) => k * x, xr, yr, c.accent, 2.6);
+    // rise / run step: origin → (1,0) → (1,k)
+    ctx.strokeStyle = c.primary; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(k)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText(lang === "zh" ? "x 增 1" : "Δx=1", ax.X(0.5), ax.Y(0) + 3);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText((lang === "zh" ? "y 增 " : "Δy=") + fmtNum(k), ax.X(1) + 6, ax.Y(k / 2));
+    // key points: origin and (1,k)
+    dot(ctx, ax.X(0), ax.Y(0), 4, c.primary);
+    dot(ctx, ax.X(1), ax.Y(k), 4.5, c.accent);
+    ctx.fillStyle = c.ink; ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+    ctx.fillText("(1, " + fmtNum(k) + ")", ax.X(1) + 6, ax.Y(k) - 4);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "比例系数 k" : "constant k"} value={k} min={-3} max={3} step={0.1} onChange={setK} />
+      </div>
+      <Readout>y = {fmtNum(k)}x &nbsp;·&nbsp; {lang === "zh" ? "比值" : "ratio"} y/x = <b>{fmtNum(k)}</b> ({lang === "zh" ? "恒定" : "constant"})</Readout>
+      <div className="viz-caption">{lang === "zh" ? "正比例函数 y=kx 的图象是过原点的直线,必过点 (1,k)。x 每增加 1,y 就改变 k;k>0 时图象在第一、三象限(y 随 x 增大),k<0 时在第二、四象限(y 随 x 减小)。" : "The graph of y=kx is a line through the origin, always passing (1,k). Each +1 in x changes y by k; k>0 lives in quadrants I & III (y increases), k<0 in II & IV (y decreases)."}</div>
+    </div>
+  );
+}
+
+/* ============ a family of proportional lines y = kx ============ */
+function ProportionFamilyDemo() {
+  const lang = useLang();
+  const xr = [-6, 6], yr = [-6, 6];
+  const ks = [2, 1, 0.5, -0.5, -1, -2];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    ks.forEach((k) => {
+      const col = k >= 0 ? c.accent : c.primary;
+      ctx.globalAlpha = 0.45 + 0.5 * Math.min(1, Math.abs(k) / 2);
+      plotFn(ctx, ax, (x) => k * x, xr, yr, col, 1.4 + Math.min(1.4, Math.abs(k) * 0.5));
+      ctx.globalAlpha = 1;
+      // label near the point where the line leaves the frame
+      let lx = xr[1] - 0.35, ly = k * lx, rightEdge = true;
+      if (ly > yr[1] - 0.35) { ly = yr[1] - 0.35; lx = ly / k; rightEdge = false; }
+      else if (ly < yr[0] + 0.35) { ly = yr[0] + 0.35; lx = ly / k; rightEdge = false; }
+      ctx.fillStyle = col; ctx.font = "10px ui-monospace,monospace"; ctx.textBaseline = "middle";
+      // Lines that exit the right edge would clip the label → right-align it inside.
+      ctx.textAlign = rightEdge ? "right" : "left";
+      ctx.fillText("k=" + k, ax.X(lx) + (rightEdge ? -4 : 4), ax.Y(ly));
+    });
+    dot(ctx, ax.X(0), ax.Y(0), 4, c.ink);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-caption">{lang === "zh" ? "所有正比例函数 y=kx 都过原点,像一把绕原点张开的扇子。|k| 越大直线越陡;k>0(橙)从左下到右上,k<0(绿)从左上到右下。" : "Every y=kx passes through the origin, like a fan pivoting there. Larger |k| means steeper; k>0 (orange) rises left-to-right, k<0 (green) falls."}</div>
+    </div>
+  );
+}
+
+/* ============ direct proportion in the real world: s = v·t ============ */
+function ProportionRealWorldDemo() {
+  const lang = useLang();
+  const [v, setV] = React.useState(60); // speed km/h
+  const tr = [0, 6], sr = [0, 480];     // hours, km
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, tr, sr);
+    const c = ax.c;
+    plotFn(ctx, ax, (t) => v * t, tr, sr, c.accent, 2.6);
+    // mark a working point at t = 3 h
+    const t0 = 3, s0 = v * t0;
+    ctx.strokeStyle = c.primary; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(ax.X(t0), ax.Y(0)); ctx.lineTo(ax.X(t0), ax.Y(Math.min(s0, sr[1])));
+    ctx.lineTo(ax.X(0), ax.Y(Math.min(s0, sr[1]))); ctx.stroke(); ctx.setLineDash([]);
+    dot(ctx, ax.X(t0), ax.Y(Math.min(s0, sr[1])), 4.5, c.accent);
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top"; ctx.fillText("t=3h", ax.X(t0), ax.Y(0) + 3);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "车速 v (km/h)" : "speed v (km/h)"} value={v} min={20} max={120} step={5} onChange={setV} />
+      </div>
+      <Readout>{lang === "zh" ? "路程" : "distance"} s = {fmtNum(v)}·t &nbsp;·&nbsp; t=3h → s = <b>{fmtNum(v * 3)}</b> km</Readout>
+      <div className="viz-caption">{lang === "zh" ? "匀速行驶时路程 s 与时间 t 成正比:s=vt,车速 v 就是比例系数 k。车速越大,同样时间跑得越远,图象越陡。" : "At constant speed, distance s is proportional to time t: s=vt, where speed v plays the role of k. Faster speed = steeper line."}</div>
+    </div>
+  );
+}
+
+/* ============ the ratio y/x = k stays constant ============ */
+function ProportionRatioDemo() {
+  const lang = useLang();
+  const [k, setK] = React.useState(1.5);
+  const xr = [0, 6], yr = [0, 9];
+  const xs = [1, 2, 3, 4];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    plotFn(ctx, ax, (x) => k * x, xr, yr, c.accent, 2.4);
+    // similar right triangles under each sample point → same shape (same ratio)
+    xs.forEach((x) => {
+      const y = k * x;
+      if (y > yr[1] + 1e-9) return;
+      ctx.strokeStyle = c.primary; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.2; ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(ax.X(x), ax.Y(0)); ctx.lineTo(ax.X(x), ax.Y(y)); ctx.lineTo(ax.X(0), ax.Y(0)); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+      dot(ctx, ax.X(x), ax.Y(y), 3.6, c.accent);
+      ctx.fillStyle = c.ink; ctx.font = "10px ui-monospace,monospace";
+      ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText(fmtNum(y) + "/" + x + "=" + fmtNum(k), ax.X(x), ax.Y(y) - 4);
+    });
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "比例系数 k" : "constant k"} value={k} min={0.5} max={2.5} step={0.1} onChange={setK} />
+      </div>
+      <Readout>{lang === "zh" ? "每个点都满足" : "every point gives"} y/x = <b>{fmtNum(k)}</b> ({lang === "zh" ? "恒定不变" : "always the same"})</Readout>
+      <div className="viz-caption">{lang === "zh" ? "正比例的核心是「比值恒定」:直线上任取一点,纵坐标 ÷ 横坐标 都等于 k。这些直角三角形彼此相似,斜率处处相同。" : "The heart of direct proportion is a constant ratio: for any point on the line, y÷x equals k. The right triangles are all similar — the slope never changes."}</div>
+    </div>
+  );
+}
+
+/* ============ one point determines y = kx (undetermined-coefficient idea) ============ */
+function ProportionThroughPointDemo() {
+  const lang = useLang();
+  const [px, setPx] = React.useState(2);
+  const [py, setPy] = React.useState(3);
+  const xr = [-6, 6], yr = [-6, 6];
+  const k = Math.abs(px) < 1e-9 ? null : py / px;
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    if (k != null) plotFn(ctx, ax, (x) => k * x, xr, yr, c.accent, 2.6);
+    dot(ctx, ax.X(0), ax.Y(0), 4, c.primary);
+    dot(ctx, ax.X(px), ax.Y(py), 5, c.accent);
+    ctx.fillStyle = c.ink; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+    ctx.fillText("(" + fmtNum(px) + ", " + fmtNum(py) + ")", ax.X(px) + 6, ax.Y(py) - 4);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "点横坐标 x" : "point x"} value={px} min={-5} max={5} step={0.5} onChange={setPx} />
+        <Slider label={lang === "zh" ? "点纵坐标 y" : "point y"} value={py} min={-5} max={5} step={0.5} onChange={setPy} />
+      </div>
+      <Readout>{k == null ? (lang === "zh" ? "x=0 无法确定 k" : "x=0 cannot fix k") : <>{lang === "zh" ? "代入 " : "sub in: "}{fmtNum(py)} = k·{fmtNum(px)} → k = <b>{fmtNum(k)}</b>, y = {fmtNum(k)}x</>}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "正比例函数必过原点,所以「再知道一个点」就能确定它:把该点代入 y=kx 解出 k(待定系数法)。移动这个点,直线随之绕原点转动。" : "Since y=kx must pass the origin, one extra point pins it down: plug the point into y=kx and solve for k. Move the point and the line pivots about the origin."}</div>
+    </div>
+  );
+}
+
 const VIZ = {
+  proportion: () => <ProportionDemo />,
+  proportionFamily: () => <ProportionFamilyDemo />,
+  proportionRealWorld: () => <ProportionRealWorldDemo />,
+  proportionRatio: () => <ProportionRatioDemo />,
+  proportionThroughPoint: () => <ProportionThroughPointDemo />,
   linear: () => <FunctionPlot config={LINEAR} />,
   quadratic: () => <FunctionPlot config={QUADRATIC} />,
   explog: () => <FunctionPlot config={EXPLOG} />,
@@ -432,11 +612,35 @@ const VIZ = {
   trig: () => <TrigDemo />,
 };
 
+const VIZ_TITLE = {
+  proportion: { zh: "正比例函数 y = kx", en: "Direct proportion y = kx" },
+  proportionFamily: { zh: "一族正比例函数 y = kx", en: "A family of lines y = kx" },
+  proportionRealWorld: { zh: "实际情境:路程 s = vt", en: "Real world: distance s = vt" },
+  proportionRatio: { zh: "比值 y/x = k 恒定", en: "Constant ratio y/x = k" },
+  proportionThroughPoint: { zh: "由一点确定 y = kx", en: "One point fixes y = kx" },
+  linear: { zh: "一次函数 y = kx + b", en: "Linear function y = kx + b" },
+};
+
 function Viz({ name }) {
-  const render = VIZ[name];
-  if (!render) return null;
-  // key by name so switching chapters remounts the demo with fresh state
-  return <div className="viz" key={name}>{render()}</div>;
+  const lang = useLang();
+  const names = (Array.isArray(name) ? name : [name]).filter((n) => VIZ[n]);
+  if (!names.length) return null;
+  const many = names.length > 1;
+  return (
+    <>
+      {names.map((n, i) => (
+        <div className="viz" key={n}>
+          {many && (
+            <div className="viz-title">
+              <span className="viz-title-idx">{String(i + 1).padStart(2, "0")}</span>
+              {VIZ_TITLE[n] ? pick(lang, VIZ_TITLE[n]) : n}
+            </div>
+          )}
+          {VIZ[n]()}
+        </div>
+      ))}
+    </>
+  );
 }
 
 window.Viz = Viz;
