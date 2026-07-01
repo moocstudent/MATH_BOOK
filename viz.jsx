@@ -597,6 +597,10 @@ function ProportionThroughPointDemo() {
 
 /* ============ combinatorics helpers ============ */
 const ITEM_LABELS = "ABCDEFGHIJ";
+function itemLabels(n) {
+  const count = Math.max(0, Math.min(ITEM_LABELS.length, Math.floor(Number(n) || 0)));
+  return Array.from(ITEM_LABELS.slice(0, count));
+}
 function permCount(n, k) {
   if (k < 0 || k > n) return 0;
   let r = 1;
@@ -639,7 +643,7 @@ function PermSlotsDemo() {
   const [n, setN] = React.useState(4);
   const [k, setK] = React.useState(2);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n).split("");
+  const labels = itemLabels(n);
   const draw = (ctx, W, H) => {
     const c = COLORS();
     ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
@@ -709,7 +713,7 @@ function CombSelectDemo() {
   const [k, setK] = React.useState(2);
   const [idx, setIdx] = React.useState(0);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n).split("");
+  const labels = itemLabels(n);
   const all = allCombinations(n, kk);
   React.useEffect(() => { setIdx(0); }, [n, kk]);
   const pick = all.length ? all[Math.min(idx, all.length - 1)] : [];
@@ -760,7 +764,7 @@ function PermVsCombDemo() {
   const [n, setN] = React.useState(4);
   const [k, setK] = React.useState(2);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n).split("");
+  const labels = itemLabels(n);
   const perms = allPermutations(n, kk);
   const combs = allCombinations(n, kk);
   const draw = (ctx, W, H) => {
