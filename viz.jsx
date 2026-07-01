@@ -601,6 +601,13 @@ function itemLabels(n) {
   const count = Math.max(0, Math.min(ITEM_LABELS.length, Math.floor(Number(n) || 0)));
   return Array.from(ITEM_LABELS.slice(0, count));
 }
+function permText(n, k, lang) {
+  return lang === "zh" ? "A" + n + "^" + k : "P(" + n + "," + k + ")";
+}
+function PermSym({ n, k, lang }) {
+  if (lang === "zh") return <><span>A<sub>{n}</sub><sup>{k}</sup></span></>;
+  return <>P({n},{k})</>;
+}
 function permCount(n, k) {
   if (k < 0 || k > n) return 0;
   let r = 1;
@@ -676,7 +683,7 @@ function PermSlotsDemo() {
     const p = permCount(n, kk);
     ctx.fillStyle = c.ink; ctx.font = "13px ui-monospace,monospace";
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    ctx.fillText("P(" + n + "," + kk + ") = " + parts.join(" × ") + " = " + p, W / 2, slotY + slotW + 28);
+    ctx.fillText(permText(n, kk, lang) + " = " + parts.join(" × ") + " = " + p, W / 2, slotY + slotW + 28);
     const ballR = Math.min(17, (W - 40) / n / 2 - 5);
     const ballGap = ballR * 2 + 10;
     const ballX0 = (W - n * ballGap + 10) / 2 + ballR;
@@ -700,7 +707,7 @@ function PermSlotsDemo() {
         <Slider label={lang === "zh" ? "元素个数 n" : "items n"} value={n} min={3} max={6} step={1} onChange={(v) => { setN(v); if (k > v) setK(v); }} />
         <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
       </div>
-      <Readout>P({n},{kk}) = <b>{permCount(n, kk)}</b> {lang === "zh" ? "种有序方案" : "ordered outcomes"}</Readout>
+      <Readout><PermSym n={n} k={kk} lang={lang} /> = <b>{permCount(n, kk)}</b> {lang === "zh" ? "种有序方案" : "ordered outcomes"}</Readout>
       <div className="viz-caption">{lang === "zh" ? "排列用乘法原理分步计数:第 1 位 n 种,第 2 位 n−1 种……每占一位,可选集合就缩小一个。" : "Permutations multiply step by step: n choices for slot 1, n−1 for slot 2, … each filled slot shrinks the pool."}</div>
     </div>
   );
@@ -752,7 +759,7 @@ function CombSelectDemo() {
         <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
         {all.length > 1 && <Slider label={lang === "zh" ? "浏览方案" : "browse"} value={idx} min={0} max={all.length - 1} step={1} onChange={setIdx} />}
       </div>
-      <Readout>C({n},{kk}) = <b>{combCount(n, kk)}</b> {lang === "zh" ? "种无序方案" : "unordered subsets"} &nbsp;·&nbsp; P({n},{kk}) / {kk}! = {permCount(n, kk)} / {kk > 1 ? kk + "!" : "1"}</Readout>
+      <Readout>C({n},{kk}) = <b>{combCount(n, kk)}</b> {lang === "zh" ? "种无序方案" : "unordered subsets"} &nbsp;·&nbsp; <PermSym n={n} k={kk} lang={lang} /> / {kk}! = {permCount(n, kk)} / {kk > 1 ? kk + "!" : "1"}</Readout>
       <div className="viz-caption">{lang === "zh" ? "组合只关心「选了谁」,同一组元素不论顺序只计一次。因此组合数 = 排列数 ÷ k!(消去同一组的 k! 种排列)。" : "Combinations care only about which items are chosen — order ignored. So C(n,k) = P(n,k) / k!, canceling the k! orderings of each set."}</div>
     </div>
   );
@@ -803,7 +810,7 @@ function PermVsCombDemo() {
         <Slider label={lang === "zh" ? "元素个数 n" : "items n"} value={n} min={3} max={5} step={1} onChange={(v) => { setN(v); if (k > v) setK(v); }} />
         <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
       </div>
-      <Readout>P({n},{kk}) = <b>{perms.length}</b> &nbsp;·&nbsp; C({n},{kk}) = <b>{combs.length}</b> &nbsp;·&nbsp; {perms.length} ÷ {kk}! = {combs.length}</Readout>
+      <Readout><PermSym n={n} k={kk} lang={lang} /> = <b>{perms.length}</b> &nbsp;·&nbsp; C({n},{kk}) = <b>{combs.length}</b> &nbsp;·&nbsp; {perms.length} ÷ {kk}! = {combs.length}</Readout>
       <div className="viz-caption">{lang === "zh" ? "同一道题:AB 与 BA 在排列中是两种方案,在组合中算同一组。组合数恒为排列数除以 k!。" : "Same problem: AB and BA are two permutations but one combination. Always C(n,k) = P(n,k) / k!."}</div>
     </div>
   );
@@ -887,7 +894,7 @@ const VIZ = {
 };
 
 const VIZ_TITLE = {
-  permSlots: { zh: "有序选 k 个:排列 P(n,k)", en: "Ordered picks: P(n,k)" },
+  permSlots: { zh: "有序选 k 个:排列 Aₙᵏ", en: "Ordered picks: P(n,k)" },
   combSelect: { zh: "无序选 k 个:组合 C(n,k)", en: "Unordered picks: C(n,k)" },
   permVsComb: { zh: "排列 vs 组合", en: "Permutations vs combinations" },
   pascalTriangle: { zh: "杨辉三角与帕斯卡公式", en: "Pascal's triangle" },
