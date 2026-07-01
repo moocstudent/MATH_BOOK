@@ -905,6 +905,7 @@ const CHAPTERS = [
   },
   {
     id: "d4", code: "DM4", moduleId: "m4", difficulty: 3, hours: 10, prereq: ["d2"],
+    viz: ["permSlots", "combSelect", "permVsComb", "pascalTriangle"],
     nExamples: 5, nExercises: 6,
     title: { zh: "组合与数论初步", en: "Combinatorics & Number Theory" },
     summary: {

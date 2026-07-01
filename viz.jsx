@@ -595,7 +595,277 @@ function ProportionThroughPointDemo() {
   );
 }
 
+/* ============ combinatorics helpers ============ */
+const ITEM_LABELS = "ABCDEFGHIJ";
+function permCount(n, k) {
+  if (k < 0 || k > n) return 0;
+  let r = 1;
+  for (let i = 0; i < k; i++) r *= n - i;
+  return r;
+}
+function combCount(n, k) {
+  if (k < 0 || k > n) return 0;
+  k = Math.min(k, n - k);
+  let r = 1;
+  for (let i = 1; i <= k; i++) r = (r * (n - k + i)) / i;
+  return Math.round(r);
+}
+function allCombinations(n, k) {
+  const res = [];
+  const go = (start, path) => {
+    if (path.length === k) { res.push([...path]); return; }
+    for (let i = start; i < n; i++) { path.push(i); go(i + 1, path); path.pop(); }
+  };
+  go(0, []);
+  return res;
+}
+function allPermutations(n, k) {
+  const res = [];
+  const used = new Array(n).fill(false);
+  const go = (path) => {
+    if (path.length === k) { res.push([...path]); return; }
+    for (let i = 0; i < n; i++) {
+      if (used[i]) continue;
+      used[i] = true; path.push(i); go(path); path.pop(); used[i] = false;
+    }
+  };
+  go([]);
+  return res;
+}
+
+/* ============ ordered slots: P(n,k) ============ */
+function PermSlotsDemo() {
+  const lang = useLang();
+  const [n, setN] = React.useState(4);
+  const [k, setK] = React.useState(2);
+  const kk = Math.min(k, n);
+  const labels = ITEM_LABELS.slice(0, n);
+  const draw = (ctx, W, H) => {
+    const c = COLORS();
+    ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+    const slotW = Math.min(46, Math.max(28, (W - 48) / kk - 10));
+    const gap = 10;
+    const rowW = kk * slotW + (kk - 1) * gap;
+    const x0 = (W - rowW) / 2;
+    const slotY = 34;
+    for (let i = 0; i < kk; i++) {
+      const x = x0 + i * (slotW + gap);
+      ctx.strokeStyle = c.ink; ctx.lineWidth = 1.6;
+      ctx.strokeRect(x, slotY, slotW, slotW);
+      ctx.fillStyle = c.muted; ctx.font = "10px ui-monospace,monospace";
+      ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+      ctx.fillText((lang === "zh" ? "第" : "") + (i + 1) + (lang === "zh" ? "位" : ""), x + slotW / 2, slotY - 4);
+      ctx.fillStyle = c.accent; ctx.font = "bold 15px ui-monospace,monospace";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(n - i), x + slotW / 2, slotY + slotW / 2);
+      ctx.fillStyle = c.muted; ctx.font = "9px ui-monospace,monospace";
+      ctx.textBaseline = "top";
+      ctx.fillText(lang === "zh" ? "种选法" : " choices", x + slotW / 2, slotY + slotW + 3);
+      if (i < kk - 1) {
+        ctx.fillStyle = c.ink; ctx.font = "16px ui-monospace,monospace";
+        ctx.textBaseline = "middle";
+        ctx.fillText("×", x + slotW + gap / 2, slotY + slotW / 2);
+      }
+    }
+    const parts = [];
+    for (let i = 0; i < kk; i++) parts.push(n - i);
+    const p = permCount(n, kk);
+    ctx.fillStyle = c.ink; ctx.font = "13px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText("P(" + n + "," + kk + ") = " + parts.join(" × ") + " = " + p, W / 2, slotY + slotW + 28);
+    const ballR = Math.min(17, (W - 40) / n / 2 - 5);
+    const ballGap = ballR * 2 + 10;
+    const ballX0 = (W - n * ballGap + 10) / 2 + ballR;
+    const ballY = H - 38;
+    labels.forEach((ch, i) => {
+      const bx = ballX0 + i * ballGap;
+      ctx.fillStyle = i % 2 ? c.primary : c.accent;
+      ctx.beginPath(); ctx.arc(bx, ballY, ballR, 0, 2 * Math.PI); ctx.fill();
+      ctx.fillStyle = c.bg; ctx.font = "bold 12px ui-monospace,monospace";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(ch, bx, ballY);
+    });
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "bottom";
+    ctx.fillText(lang === "zh" ? "n 个不同元素(无放回)" : "n distinct items (no replacement)", W / 2, ballY - ballR - 6);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={240} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "元素个数 n" : "items n"} value={n} min={3} max={6} step={1} onChange={(v) => { setN(v); if (k > v) setK(v); }} />
+        <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
+      </div>
+      <Readout>P({n},{kk}) = <b>{permCount(n, kk)}</b> {lang === "zh" ? "种有序方案" : "ordered outcomes"}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "排列用乘法原理分步计数:第 1 位 n 种,第 2 位 n−1 种……每占一位,可选集合就缩小一个。" : "Permutations multiply step by step: n choices for slot 1, n−1 for slot 2, … each filled slot shrinks the pool."}</div>
+    </div>
+  );
+}
+
+/* ============ unordered subset: C(n,k) ============ */
+function CombSelectDemo() {
+  const lang = useLang();
+  const [n, setN] = React.useState(5);
+  const [k, setK] = React.useState(2);
+  const [idx, setIdx] = React.useState(0);
+  const kk = Math.min(k, n);
+  const labels = ITEM_LABELS.slice(0, n);
+  const all = allCombinations(n, kk);
+  React.useEffect(() => { setIdx(0); }, [n, kk]);
+  const pick = all.length ? all[Math.min(idx, all.length - 1)] : [];
+  const pickSet = new Set(pick);
+  const draw = (ctx, W, H) => {
+    const c = COLORS();
+    ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+    const ballR = Math.min(20, (W - 40) / n / 2 - 4);
+    const ballGap = ballR * 2 + 14;
+    const ballX0 = (W - n * ballGap + 14) / 2 + ballR;
+    const ballY = H / 2 - 8;
+    labels.forEach((ch, i) => {
+      const bx = ballX0 + i * ballGap;
+      const on = pickSet.has(i);
+      ctx.fillStyle = on ? c.accent : c.surface;
+      ctx.strokeStyle = on ? c.accent : c.hair;
+      ctx.lineWidth = on ? 2 : 1;
+      ctx.beginPath(); ctx.arc(bx, ballY, ballR, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = on ? c.bg : c.ink;
+      ctx.font = (on ? "bold " : "") + "13px ui-monospace,monospace";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(ch, bx, ballY);
+    });
+    const subset = pick.map((i) => labels[i]).join(", ");
+    ctx.fillStyle = c.ink; ctx.font = "13px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText("{" + subset + "}", W / 2, ballY + ballR + 18);
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.fillText((lang === "zh" ? "方案 " : "case ") + (all.length ? idx + 1 : 0) + " / " + all.length, W / 2, 16);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={200} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "元素个数 n" : "items n"} value={n} min={3} max={6} step={1} onChange={(v) => { setN(v); if (k > v) setK(v); }} />
+        <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
+        {all.length > 1 && <Slider label={lang === "zh" ? "浏览方案" : "browse"} value={idx} min={0} max={all.length - 1} step={1} onChange={setIdx} />}
+      </div>
+      <Readout>C({n},{kk}) = <b>{combCount(n, kk)}</b> {lang === "zh" ? "种无序方案" : "unordered subsets"} &nbsp;·&nbsp; P({n},{kk}) / {kk}! = {permCount(n, kk)} / {kk > 1 ? kk + "!" : "1"}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "组合只关心「选了谁」,同一组元素不论顺序只计一次。因此组合数 = 排列数 ÷ k!(消去同一组的 k! 种排列)。" : "Combinations care only about which items are chosen — order ignored. So C(n,k) = P(n,k) / k!, canceling the k! orderings of each set."}</div>
+    </div>
+  );
+}
+
+/* ============ permutation vs combination side by side ============ */
+function PermVsCombDemo() {
+  const lang = useLang();
+  const [n, setN] = React.useState(4);
+  const [k, setK] = React.useState(2);
+  const kk = Math.min(k, n);
+  const labels = ITEM_LABELS.slice(0, n);
+  const perms = allPermutations(n, kk);
+  const combs = allCombinations(n, kk);
+  const draw = (ctx, W, H) => {
+    const c = COLORS();
+    ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+    const mid = W / 2;
+    ctx.strokeStyle = c.hair; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(mid, 12); ctx.lineTo(mid, H - 12); ctx.stroke();
+    const drawList = (items, x0, w, title, col, formatter) => {
+      ctx.fillStyle = col; ctx.font = "bold 12px ui-monospace,monospace";
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText(title, x0 + w / 2, 14);
+      ctx.fillStyle = c.muted; ctx.font = "10px ui-monospace,monospace";
+      ctx.fillText(items.length + (lang === "zh" ? " 种" : " ways"), x0 + w / 2, 30);
+      const cols = Math.max(2, Math.floor(w / 52));
+      const rowH = 18;
+      const startY = 48;
+      items.forEach((item, i) => {
+        const ci = i % cols, row = Math.floor(i / cols);
+        const x = x0 + 12 + ci * 50;
+        const y = startY + row * rowH;
+        if (y > H - 20) return;
+        ctx.fillStyle = c.ink; ctx.font = "11px ui-monospace,monospace";
+        ctx.textAlign = "left"; ctx.textBaseline = "top";
+        ctx.fillText(formatter(item), x, y);
+      });
+    };
+    const half = mid - 8;
+    drawList(perms, 8, half, lang === "zh" ? "排列(计顺序)" : "Permutations", c.accent, (p) => p.map((i) => labels[i]).join(""));
+    drawList(combs, mid + 8, half, lang === "zh" ? "组合(不计顺序)" : "Combinations", c.primary, (p) => "{" + p.map((i) => labels[i]).join(",") + "}");
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={Math.min(320, 80 + Math.ceil(permCount(n, kk) / 2) * 18)} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "元素个数 n" : "items n"} value={n} min={3} max={5} step={1} onChange={(v) => { setN(v); if (k > v) setK(v); }} />
+        <Slider label={lang === "zh" ? "选取个数 k" : "pick k"} value={kk} min={1} max={n} step={1} onChange={setK} />
+      </div>
+      <Readout>P({n},{kk}) = <b>{perms.length}</b> &nbsp;·&nbsp; C({n},{kk}) = <b>{combs.length}</b> &nbsp;·&nbsp; {perms.length} ÷ {kk}! = {combs.length}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "同一道题:AB 与 BA 在排列中是两种方案,在组合中算同一组。组合数恒为排列数除以 k!。" : "Same problem: AB and BA are two permutations but one combination. Always C(n,k) = P(n,k) / k!."}</div>
+    </div>
+  );
+}
+
+/* ============ Pascal's triangle ============ */
+function PascalTriangleDemo() {
+  const lang = useLang();
+  const [rows, setRows] = React.useState(6);
+  const [selN, setSelN] = React.useState(4);
+  const [selK, setSelK] = React.useState(2);
+  const sn = Math.min(selN, rows);
+  const sk = Math.min(selK, sn);
+  const draw = (ctx, W, H) => {
+    const c = COLORS();
+    ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+    const maxRow = rows;
+    const cellW = Math.min(44, (W - 24) / (maxRow + 2));
+    const cellH = 26;
+    const topY = 20;
+    for (let n = 0; n <= maxRow; n++) {
+      const rowLen = n + 1;
+      const rowW = rowLen * cellW;
+      const x0 = (W - rowW) / 2;
+      for (let k = 0; k <= n; k++) {
+        const x = x0 + k * cellW;
+        const y = topY + n * cellH;
+        const val = combCount(n, k);
+        const hl = n === sn && k === sk;
+        const parent = n === sn && (k === sk || k === sk + 1);
+        ctx.fillStyle = hl ? c.accent : parent ? c.surface : c.bg;
+        ctx.fillRect(x + 2, y + 2, cellW - 4, cellH - 4);
+        ctx.strokeStyle = hl ? c.accent : parent ? c.primary : c.hair;
+        ctx.lineWidth = hl ? 2 : 1;
+        ctx.strokeRect(x + 2, y + 2, cellW - 4, cellH - 4);
+        ctx.fillStyle = hl ? c.bg : c.ink;
+        ctx.font = (hl ? "bold " : "") + "11px ui-monospace,monospace";
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        ctx.fillText(String(val), x + cellW / 2, y + cellH / 2);
+      }
+    }
+  };
+  const left = sn > 0 && sk > 0 ? combCount(sn - 1, sk - 1) : 0;
+  const right = sn > 0 ? combCount(sn - 1, sk) : 0;
+  return (
+    <div>
+      <Canvas draw={draw} height={20 + (rows + 1) * 26 + 16} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "行数" : "rows"} value={rows} min={4} max={8} step={1} onChange={(v) => { setRows(v); if (selN > v) setSelN(v); }} />
+        <Slider label="n" value={sn} min={0} max={rows} step={1} onChange={(v) => { setSelN(v); if (selK > v) setSelK(v); }} />
+        <Slider label="k" value={sk} min={0} max={sn} step={1} onChange={setSelK} />
+      </div>
+      <Readout>
+        C({sn},{sk}) = <b>{combCount(sn, sk)}</b>
+        {sn > 0 && <> &nbsp;·&nbsp; C({sn - 1},{sk - 1}) + C({sn - 1},{sk}) = {left} + {right} = <b>{left + right}</b></>}
+      </Readout>
+      <div className="viz-caption">{lang === "zh" ? "杨辉三角第 n 行第 k 个数就是 C(n,k)。每个数等于肩上两数之和,对应「固定某元素选或不选」的帕斯卡分类。" : "Row n, entry k of Pascal's triangle is C(n,k). Each entry is the sum of the two above — the choose / skip split."}</div>
+    </div>
+  );
+}
+
 const VIZ = {
+  permSlots: () => <PermSlotsDemo />,
+  combSelect: () => <CombSelectDemo />,
+  permVsComb: () => <PermVsCombDemo />,
+  pascalTriangle: () => <PascalTriangleDemo />,
   proportion: () => <ProportionDemo />,
   proportionFamily: () => <ProportionFamilyDemo />,
   proportionRealWorld: () => <ProportionRealWorldDemo />,
@@ -613,6 +883,10 @@ const VIZ = {
 };
 
 const VIZ_TITLE = {
+  permSlots: { zh: "有序选 k 个:排列 P(n,k)", en: "Ordered picks: P(n,k)" },
+  combSelect: { zh: "无序选 k 个:组合 C(n,k)", en: "Unordered picks: C(n,k)" },
+  permVsComb: { zh: "排列 vs 组合", en: "Permutations vs combinations" },
+  pascalTriangle: { zh: "杨辉三角与帕斯卡公式", en: "Pascal's triangle" },
   proportion: { zh: "正比例函数 y = kx", en: "Direct proportion y = kx" },
   proportionFamily: { zh: "一族正比例函数 y = kx", en: "A family of lines y = kx" },
   proportionRealWorld: { zh: "实际情境:路程 s = vt", en: "Real world: distance s = vt" },
