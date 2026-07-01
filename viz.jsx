@@ -639,7 +639,7 @@ function PermSlotsDemo() {
   const [n, setN] = React.useState(4);
   const [k, setK] = React.useState(2);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n);
+  const labels = ITEM_LABELS.slice(0, n).split("");
   const draw = (ctx, W, H) => {
     const c = COLORS();
     ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
@@ -709,7 +709,7 @@ function CombSelectDemo() {
   const [k, setK] = React.useState(2);
   const [idx, setIdx] = React.useState(0);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n);
+  const labels = ITEM_LABELS.slice(0, n).split("");
   const all = allCombinations(n, kk);
   React.useEffect(() => { setIdx(0); }, [n, kk]);
   const pick = all.length ? all[Math.min(idx, all.length - 1)] : [];
@@ -760,7 +760,7 @@ function PermVsCombDemo() {
   const [n, setN] = React.useState(4);
   const [k, setK] = React.useState(2);
   const kk = Math.min(k, n);
-  const labels = ITEM_LABELS.slice(0, n);
+  const labels = ITEM_LABELS.slice(0, n).split("");
   const perms = allPermutations(n, kk);
   const combs = allCombinations(n, kk);
   const draw = (ctx, W, H) => {
