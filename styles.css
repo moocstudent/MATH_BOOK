@@ -1697,6 +1697,12 @@ html[data-theme="dark"] .course-prose .katex { color: var(--ink); }
 }
 
 /* ============== Interactive viz (viz.jsx) ============== */
+.prose-viz { margin: 10px 0 16px; }
+.prose-viz .viz { margin: 0; }
+.prose-viz .viz + .viz { margin-top: 0; padding-top: 0; border-top: 0; }
+.prose-viz .viz-controls { margin-top: 10px; margin-bottom: 0; }
+.prose-viz .viz-caption { margin-top: 8px; margin-bottom: 0; font-size: 12px; }
+
 .viz { margin: 8px 0 4px; }
 .viz + .viz { margin-top: 30px; padding-top: 26px; border-top: 1px dashed var(--hairline-strong); }
 .viz-title { display: flex; align-items: baseline; gap: 10px; font-family: Noto Serif SC, serif; font-size: 17px; color: var(--ink); margin: 0 0 12px; }

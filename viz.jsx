@@ -872,6 +872,97 @@ function PascalTriangleDemo() {
   );
 }
 
+/* ============ linear function: k controls slope (b = 0) ============ */
+function LinearKDemo() {
+  const lang = useLang();
+  const [k, setK] = React.useState(1.5);
+  const xr = [-6, 6], yr = [-6, 6];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    ctx.save(); ctx.globalAlpha = 0.09; ctx.fillStyle = k >= 0 ? c.accent : c.primary;
+    if (k >= 0) {
+      ctx.fillRect(ax.X(0), ax.Y(yr[1]), ax.X(xr[1]) - ax.X(0), ax.Y(0) - ax.Y(yr[1]));
+      ctx.fillRect(ax.X(xr[0]), ax.Y(0), ax.X(0) - ax.X(xr[0]), ax.Y(yr[0]) - ax.Y(0));
+    } else {
+      ctx.fillRect(ax.X(xr[0]), ax.Y(yr[1]), ax.X(0) - ax.X(xr[0]), ax.Y(0) - ax.Y(yr[1]));
+      ctx.fillRect(ax.X(0), ax.Y(0), ax.X(xr[1]) - ax.X(0), ax.Y(yr[0]) - ax.Y(0));
+    }
+    ctx.restore();
+    ctx.globalAlpha = 0.3;
+    plotFn(ctx, ax, (x) => x, xr, yr, c.muted, 1.2);
+    ctx.globalAlpha = 1;
+    plotFn(ctx, ax, (x) => k * x, xr, yr, k >= 0 ? c.accent : c.primary, 2.6);
+    ctx.strokeStyle = c.primary; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(k)); ctx.stroke();
+    ctx.setLineDash([]);
+    dot(ctx, ax.X(0), ax.Y(0), 4, c.ink);
+    dot(ctx, ax.X(1), ax.Y(k), 4.5, k >= 0 ? c.accent : c.primary);
+    ctx.fillStyle = c.muted; ctx.font = "10px ui-monospace,monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    ctx.fillText(lang === "zh" ? "x 增 1" : "Δx=1", ax.X(0.5), ax.Y(0) + 3);
+    ctx.textAlign = "left"; ctx.textBaseline = "middle";
+    ctx.fillText((lang === "zh" ? "y 增 " : "Δy=") + fmtNum(k), ax.X(1) + 6, ax.Y(k / 2));
+    const dir = k > 0 ? (lang === "zh" ? "↗ 递增" : "↗ rises") : k < 0 ? (lang === "zh" ? "↘ 递减" : "↘ falls") : "—";
+    ctx.fillStyle = k >= 0 ? c.accent : c.primary; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "right"; ctx.textBaseline = "top";
+    ctx.fillText(dir + "  |k|=" + fmtNum(Math.abs(k)), W - 14, 12);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={210} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "斜率 k" : "slope k"} value={k} min={-3} max={3} step={0.1} onChange={setK} />
+      </div>
+      <div className="viz-caption">{lang === "zh" ? "拖动 k:k>0 直线从左下向右上(y 随 x 增大),k<0 从左上向右下;|k| 越大(对比灰色 y=x)越陡。" : "Drag k: k>0 rises left-to-right, k<0 falls; larger |k| (vs grey y=x) means steeper."}</div>
+    </div>
+  );
+}
+
+/* ============ linear function: b controls y-intercept (vertical shift) ============ */
+function LinearBDemo() {
+  const lang = useLang();
+  const kFix = 1.5;
+  const [b, setB] = React.useState(2);
+  const xr = [-6, 6], yr = [-6, 6];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    ctx.setLineDash([5, 5]); ctx.globalAlpha = 0.55;
+    plotFn(ctx, ax, (x) => kFix * x, xr, yr, c.muted, 1.6);
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    plotFn(ctx, ax, (x) => kFix * x + b, xr, yr, c.accent, 2.6);
+    if (Math.abs(b) > 0.08) {
+      ctx.strokeStyle = c.primary; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(0), ax.Y(b)); ctx.stroke();
+      const ay = b > 0 ? -1 : 1;
+      ctx.fillStyle = c.primary;
+      ctx.beginPath(); ctx.moveTo(ax.X(0) - 4, ax.Y(b) + ay * 6); ctx.lineTo(ax.X(0), ax.Y(b)); ctx.lineTo(ax.X(0) + 4, ax.Y(b) + ay * 6); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(ax.X(0) - 4, ax.Y(0) - ay * 6); ctx.lineTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(0) + 4, ax.Y(0) - ay * 6); ctx.fill();
+      ctx.fillStyle = c.muted; ctx.font = "10px ui-monospace,monospace";
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText((lang === "zh" ? "平移 |b|=" : "|b|=") + fmtNum(Math.abs(b)), ax.X(0) + 8, ax.Y(b / 2));
+    }
+    dot(ctx, ax.X(0), ax.Y(0), 3.5, c.muted);
+    dot(ctx, ax.X(0), ax.Y(b), 5, c.accent);
+    ctx.fillStyle = c.ink; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = b >= 0 ? "bottom" : "top";
+    ctx.fillText("(0, " + fmtNum(b) + ")", ax.X(0) + 6, ax.Y(b) + (b >= 0 ? -4 : 4));
+    ctx.fillStyle = c.muted; ctx.font = "10px ui-monospace,monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+    ctx.fillText(lang === "zh" ? "虚线 y=" + kFix + "x" : "dashed y=" + kFix + "x", 14, 14);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={210} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "截距 b" : "intercept b"} value={b} min={-4} max={4} step={0.5} onChange={setB} />
+      </div>
+      <div className="viz-caption">{lang === "zh" ? "虚线是 y=kx,实线是 y=kx+b。固定斜率,拖动 b 沿 y 轴上下平移直线,过点 (0,b)。" : "Dashed: y=kx; solid: y=kx+b. Fix the slope and drag b to shift the line vertically through (0,b)."}</div>
+    </div>
+  );
+}
+
 const VIZ = {
   permSlots: () => <PermSlotsDemo />,
   combSelect: () => <CombSelectDemo />,
@@ -882,6 +973,8 @@ const VIZ = {
   proportionRealWorld: () => <ProportionRealWorldDemo />,
   proportionRatio: () => <ProportionRatioDemo />,
   proportionThroughPoint: () => <ProportionThroughPointDemo />,
+  linearK: () => <LinearKDemo />,
+  linearB: () => <LinearBDemo />,
   linear: () => <FunctionPlot config={LINEAR} />,
   quadratic: () => <FunctionPlot config={QUADRATIC} />,
   explog: () => <FunctionPlot config={EXPLOG} />,
@@ -903,6 +996,8 @@ const VIZ_TITLE = {
   proportionRealWorld: { zh: "实际情境:路程 s = vt", en: "Real world: distance s = vt" },
   proportionRatio: { zh: "比值 y/x = k 恒定", en: "Constant ratio y/x = k" },
   proportionThroughPoint: { zh: "由一点确定 y = kx", en: "One point fixes y = kx" },
+  linearK: { zh: "斜率 k 决定倾斜", en: "Slope k controls tilt" },
+  linearB: { zh: "截距 b 决定上下平移", en: "Intercept b shifts the line" },
   linear: { zh: "一次函数 y = kx + b", en: "Linear function y = kx + b" },
 };
 

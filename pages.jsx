@@ -28,7 +28,7 @@ function renderMarkdownWithMath(md) {
   return html;
 }
 
-const Prose = ({ md, className }) => {
+const ProseBlock = ({ md }) => {
   const ref = React.useRef(null);
   const html = React.useMemo(() => renderMarkdownWithMath(md), [md]);
   React.useEffect(() => {
@@ -49,7 +49,44 @@ const Prose = ({ md, className }) => {
       } catch (e) {}
     }
   }, [html]);
-  return <div className={className || "course-prose"} ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
+  if (!md || !md.trim()) return null;
+  return <div ref={ref} dangerouslySetInnerHTML={{ __html: html }} />;
+};
+
+function splitProseWithViz(md) {
+  if (!md) return [{ type: "md", text: "" }];
+  const re = /\{\{viz:([a-zA-Z0-9_]+)\}\}/g;
+  const parts = [];
+  let last = 0;
+  let m;
+  while ((m = re.exec(md)) !== null) {
+    if (m.index > last) parts.push({ type: "md", text: md.slice(last, m.index) });
+    parts.push({ type: "viz", name: m[1] });
+    last = m.index + m[0].length;
+  }
+  if (last < md.length) parts.push({ type: "md", text: md.slice(last) });
+  if (!parts.length) parts.push({ type: "md", text: md });
+  return parts;
+}
+
+const Prose = ({ md, className }) => {
+  const parts = React.useMemo(() => splitProseWithViz(md), [md]);
+  const cls = className || "course-prose";
+  if (parts.length === 1 && parts[0].type === "md") {
+    return <div className={cls}><ProseBlock md={parts[0].text} /></div>;
+  }
+  return (
+    <div className={cls}>
+      {parts.map((p, i) => {
+        if (p.type === "md") return <ProseBlock key={"m" + i} md={p.text} />;
+        return (
+          <div className="prose-viz" key={"v" + i}>
+            <div className="viz"><Viz name={p.name} /></div>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 // Fetch content/<id>.<lang>.md only when unlocked; fall back to the other language.
