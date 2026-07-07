@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>装柜专家 Demo</title>
+<style>
+  :root {
+    --bg: #0f172a; --panel: #1e293b; --panel2: #273449;
+    --border: #334155; --text: #e2e8f0; --muted: #94a3b8;
+    --accent: #38bdf8; --accent2: #22c55e; --danger: #ef4444;
+    --sidebar-w: 440px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh; overflow: hidden;
+  }
+  #app {
+    display: grid; grid-template-columns: var(--sidebar-w) 7px minmax(0, 1fr);
+    height: 100vh; overflow: hidden;
+  }
+  #sidebar {
+    background: var(--panel);
+    padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
+  }
+  #resizer {
+    background: var(--border); cursor: col-resize; position: relative;
+    transition: background .15s;
+  }
+  #resizer:hover, #resizer.dragging { background: var(--accent); }
+  #resizer::after {
+    content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 3px; height: 40px; border-radius: 3px; background: var(--muted); opacity: .6;
+  }
+  body.resizing { cursor: col-resize; user-select: none; }
+  h1 { font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px; }
+  h1 small { color: var(--muted); font-size: 11px; font-weight: normal; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 0; }
+  .card { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
+  th { color: var(--muted); font-weight: 500; text-align: left; padding: 2px 4px; }
+  td { padding: 2px 3px; }
+  input[type=text], input[type=number], select {
+    background: #0b1220; border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 5px 6px; font-size: 12px;
+  }
+  #sidebar td input[type=text], #sidebar td input[type=number] { width: 100%; }
+  #sidebar td input.cell-color { width: 28px; height: 22px; padding: 0; border: none; cursor: pointer; }
+  input[type=number] { text-align: right; }
+  .row-item td { padding-top: 4px; }
+  button {
+    cursor: pointer; border: none; border-radius: 8px; padding: 9px 12px;
+    font-size: 13px; font-weight: 600; color: #05223a; background: var(--accent);
+    transition: filter .15s;
+  }
+  button:hover { filter: brightness(1.1); }
+  button.secondary { background: var(--panel2); color: var(--text); border: 1px solid var(--border); font-weight: 500; }
+  button.mini { padding: 3px 8px; font-size: 11px; }
+  .btn-pack { width: 100%; padding: 12px; font-size: 15px; background: var(--accent2); color: #052e12; }
+  .flex { display: flex; gap: 8px; align-items: center; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #viewer {
+    min-width: 0; min-height: 0; height: 100%;
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  #viewer-body { display: flex; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+  #plan-tree {
+    width: 148px; flex-shrink: 0; background: var(--panel);
+    border-right: 1px solid var(--border); overflow-y: auto;
+    font-size: 12px; display: none;
+  }
+  #plan-tree .tree-root { padding: 8px 0; }
+  #plan-tree .tree-title {
+    padding: 6px 12px; font-weight: 600; color: var(--text);
+    border-bottom: 1px solid var(--border); margin-bottom: 4px;
+  }
+  #plan-tree .tree-cname { padding: 4px 12px 4px 18px; color: var(--muted); font-size: 11px; }
+  #plan-tree .tree-step {
+    padding: 6px 12px 6px 28px; cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  #plan-tree .tree-step:hover { background: var(--panel2); }
+  #plan-tree .tree-step.active {
+    background: #1e3a5f; border-left-color: var(--accent); color: var(--accent);
+  }
+  #viewer-main { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+  #canvas-wrap { position: relative; flex: 1; min-height: 120px; min-width: 0; overflow: hidden; }
+  #step-info-panel {
+    flex-shrink: 0; display: none;
+    background: #d1d5db; color: #111827;
+    border-top: 1px solid #9ca3af; padding: 8px 14px; font-size: 12px;
+    max-height: 26vh; overflow-y: auto;
+  }
+  #step-info-panel .info-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2px 16px;
+  }
+  #step-info-panel .info-row { display: flex; gap: 6px; line-height: 1.45; min-width: 0; }
+  #step-info-panel .k { color: #374151; white-space: nowrap; flex-shrink: 0; }
+  #step-info-panel .v { font-weight: 600; word-break: break-word; }
+  .overlay {
+    position: absolute; top: 12px; left: 12px; right: 56px;
+    display: flex; gap: 8px; flex-wrap: wrap; z-index: 5; pointer-events: none;
+    max-height: 40%; overflow-y: auto;
+  }
+  .chip {
+    pointer-events: auto; background: rgba(30,41,59,.92); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer;
+  }
+  .chip.active { border-color: var(--accent); color: var(--accent); }
+  .float { position: absolute; z-index: 5; background: rgba(30,41,59,.94);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 12px; }
+  .stat {
+    bottom: 12px; left: 12px; line-height: 1.6;
+    max-width: min(260px, calc(100% - 24px)); pointer-events: auto;
+  }
+  .bar { height: 6px; background: #0b1220; border-radius: 4px; overflow: hidden; margin-top: 3px; width: min(190px, 100%); }
+  .bar > i { display: block; height: 100%; background: var(--accent2); }
+  .legend {
+    bottom: 12px; right: 12px;
+    max-height: min(200px, 32%); max-width: min(220px, calc(100% - 24px));
+    overflow-y: auto; overflow-x: hidden; pointer-events: auto;
+  }
+  .legend div.lg { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid #0006; }
+  .detail {
+    top: 56px; right: 12px; min-width: 160px;
+    max-width: min(240px, calc(100% - 24px)); pointer-events: auto;
+    display: none;
+  }
+  .stat b { color: var(--accent); }
+  .stat-main { transition: opacity .25s; }
+  .stat.cog-focus .stat-main { opacity: 0.2; }
+  .cog-stat-block {
+    cursor: pointer; border-radius: 8px; margin: 6px -8px -4px; padding: 8px;
+    border: 1px solid transparent; border-top: 1px solid var(--border);
+    transition: border-color .2s, background .2s, box-shadow .2s;
+  }
+  .cog-stat-block:hover, .stat.cog-focus .cog-stat-block {
+    background: rgba(245, 158, 11, 0.16);
+    border-color: rgba(251, 191, 36, 0.6);
+    box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+  }
+  .cog-focus-dim { opacity: 0.18 !important; transition: opacity .25s; pointer-events: none; }
+  #step-info-panel.cog-focus-dim { opacity: 0.12 !important; }
+  .mode-hint { font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 6px; }
+  .mode-badge { font-size: 10px; color: var(--accent); margin-left: 6px; }
+  #cog-focus-veil {
+    position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
+    transition: opacity .28s;
+    background: radial-gradient(ellipse 75% 65% at 50% 58%, transparent 8%, rgba(11, 18, 32, 0.62) 72%);
+  }
+  #cog-focus-veil.active { opacity: 1; }
+  .detail .k { color: var(--muted); }
+  .detail .close { float: right; cursor: pointer; color: var(--muted); }
+  #sidebar select.preset { flex: 1; min-width: 0; max-width: 220px; font-size: 11px; }
+  .unpacked { color: #fca5a5; font-size: 11px; margin-top: 6px; }
+  .rec-panel {
+    margin-top: 10px; padding: 10px; border-radius: 8px;
+    background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);
+    font-size: 12px;
+  }
+  .rec-panel h3 { margin: 0 0 8px; font-size: 13px; color: #38bdf8; }
+  .rec-item {
+    padding: 8px; margin-bottom: 6px; border-radius: 6px;
+    background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border);
+  }
+  .rec-item.best { border-color: #38bdf8; }
+  .rec-item .rec-meta { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .rec-item button { margin-top: 6px; width: 100%; }
+  .toolbtn { position: absolute; z-index: 5; }
+  .anim-tools {
+    position: absolute; top: 12px; right: 12px; z-index: 5;
+    display: flex; gap: 8px; pointer-events: auto;
+  }
+  .edit { color: var(--accent); cursor: pointer; font-size: 13px; }
+  .modal {
+    position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,.55);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    width: min(760px, 98vw); max-height: 92vh; overflow-y: auto; padding: 16px 18px;
+  }
+  .modal-box h2 { margin: 0 0 12px; font-size: 16px; }
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; font-size: 12px; }
+  .modal-grid label { display: flex; flex-direction: column; gap: 4px; color: var(--muted); }
+  .modal-grid label.full { grid-column: 1 / -1; }
+  .modal-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+  .modal-tabs button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    padding: 6px 12px; font-size: 12px; font-weight: 500;
+  }
+  .modal-tabs button.active { border-color: var(--accent); color: var(--accent); }
+  .orient-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+  .orient-table th, .orient-table td { border: 1px solid var(--border); padding: 5px 6px; text-align: center; }
+  .orient-table th { color: var(--muted); font-weight: 500; }
+  .orient-table td:first-child { text-align: left; }
+  .size-table { width: 100%; font-size: 11px; border-collapse: collapse; margin-top: 4px; }
+  .size-table th, .size-table td { border: 1px solid var(--border); padding: 4px 5px; text-align: center; }
+  .size-table th { color: var(--muted); font-weight: 500; }
+  .size-table td:first-child { text-align: left; font-weight: 500; }
+  .size-table input[type=number] { width: 100%; min-width: 0; padding: 3px 4px; }
+  .size-table input[type=radio] { width: auto; margin: 0 4px 0 0; }
+  .cell-radio { display: flex; align-items: center; justify-content: center; gap: 2px; }
+  .modal-top { display: grid; grid-template-columns: 1fr 72px; gap: 10px; margin-bottom: 12px; }
+  .modal-top .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+  .preview-box {
+    width: 72px; height: 56px; border-radius: 6px; border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--c1,#4C72B0) 45%, var(--c2,#8fa8d8) 45%);
+  }
+  .modal-unit-bar {
+    display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center;
+    margin-bottom: 10px; font-size: 12px; color: var(--muted);
+  }
+  .modal-unit-bar label { display: flex; align-items: center; gap: 6px; }
+  .modal-unit-bar select { min-width: 88px; padding: 4px 6px; font-size: 12px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .lib-table tr { cursor: pointer; }
+  .lib-table tr:hover td { background: var(--panel2); }
+  .lib-hint { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .swatch-sm { display: inline-block; width: 10px; height: 10px; border-radius: 2px; border: 1px solid #0006; vertical-align: middle; margin-right: 4px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="flex-between" style="margin-bottom:0">
+      <h1>📦 <span data-i18n="title">装柜专家</span> <small>Demo</small></h1>
+      <div class="flex">
+        <select id="lang" onchange="setLang(this.value)">
+          <option value="zh">中文</option>
+          <option value="en">EN</option>
+        </select>
+        <select id="unit" onchange="setUnit(this.value)">
+          <option value="metric">cm/kg</option>
+          <option value="imperial">in/lb</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex-between">
+        <h2 data-i18n="containers">集装箱</h2>
+        <div class="flex" style="gap:6px">
+          <select id="container_preset" class="preset" title=""></select>
+          <button class="secondary mini" onclick="addContainer()" data-i18n="add">+ 添加</button>
+        </div>
+      </div>
+      <table>
+        <colgroup id="ch-colgroup"></colgroup>
+        <thead><tr id="ch-head"></tr></thead>
+        <tbody id="containers"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="flex-between">
+        <h2 data-i18n="cargo">货物</h2>
+        <div class="flex" style="gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <button class="secondary mini" onclick="downloadTemplate()" data-i18n="template">模板</button>
+          <button class="secondary mini" onclick="document.getElementById('xlsx').click()" data-i18n="import">导入</button>
+        </div>
+      </div>
+      <div class="flex" style="gap:6px;margin-bottom:8px">
+        <select id="item_preset" class="preset" title=""></select>
+        <button class="secondary mini" onclick="openItemLibrary()" data-i18n="cargoLibrary">货物库</button>
+        <button class="secondary mini" onclick="addItem()" data-i18n="add">+ 添加</button>
+      </div>
+      <input type="file" id="xlsx" accept=".xlsx" style="display:none" onchange="importItems(this.files[0])" />
+      <table>
+        <colgroup id="it-colgroup"></colgroup>
+        <thead><tr id="it-head"></tr></thead>
+        <tbody id="items"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="packMode" style="margin-bottom:8px">装柜方式</h2>
+      <select id="pack_mode" style="width:100%;margin-bottom:6px" onchange="onPackModeChange()">
+        <option value="multi_multi" data-i18n="modeMultiMulti">多货多柜</option>
+        <option value="single_multi" data-i18n="modeSingleMulti">单货多柜</option>
+        <option value="volume_ratio" data-i18n="modeVolumeRatio">体积配比</option>
+        <option value="variable_qty" data-i18n="modeVariableQty">数量不定</option>
+      </select>
+      <div id="mode-hint" class="mode-hint"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="params" style="margin-bottom:8px">参数</h2>
+      <div class="flex-between" style="font-size:12px;margin-bottom:8px;align-items:center">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="pack_anim" style="width:auto" onchange="onPackAnimChange(this.checked)" />
+          <span data-i18n="packAnim">装柜动画</span>
+        </label>
+      </div>
+      <div class="flex-between" style="font-size:12px;margin-bottom:8px">
+        <span>
+          <span data-i18n="ssr">底面支撑率</span>
+          <span style="color:var(--muted);font-size:11px;margin-left:4px" data-i18n="ssrDefault">(默认 0.70)</span>
+        </span>
+        <input type="number" id="ssr" value="0.70" step="0.05" min="0" max="1" style="width:70px" />
+      </div>
+      <div style="font-size:12px;margin-bottom:6px" data-i18n="packStrategy">码放策略</div>
+      <select id="pack_strategy" style="width:100%;margin-bottom:6px">
+        <option value="door_last" selected data-i18n="strategyDoor">门侧最后码放(默认)</option>
+        <option value="extreme_point" data-i18n="strategyExtreme">极点法</option>
+      </select>
+      <div style="font-size:11px;color:var(--muted)" data-i18n="doorFixedHint">门侧最后:门在 x=长,从里向外码满;假想验—假设门朝天往里灌水,里侧可进水空隙尽量小</div>
+    </div>
+
+    <button class="btn-pack" onclick="runPack()" data-i18n="pack">🚀 开始装柜</button>
+
+    <div class="grid2">
+      <button class="secondary" onclick="viewReport()" data-i18n="viewReport">查看报表</button>
+      <button class="secondary" onclick="exportReport('pdf')" data-i18n="exportPdf">导出 PDF</button>
+    </div>
+    <button class="secondary" style="width:100%;margin-top:8px" onclick="exportReport('excel')" data-i18n="exportExcel">导出 Excel</button>
+
+    <div id="msg" style="font-size:12px;color:var(--muted);min-height:16px"></div>
+    <div id="rec-panel" class="rec-panel" style="display:none"></div>
+  </aside>
+
+  <div id="resizer" title="拖拽调整面板宽度"></div>
+
+  <section id="viewer">
+    <div id="viewer-body">
+      <aside id="plan-tree">
+        <div class="tree-root">
+          <div class="tree-title" data-i18n="loadPlan">装柜方案</div>
+          <div id="plan-tree-body"></div>
+        </div>
+      </aside>
+      <div id="viewer-main">
+        <div id="canvas-wrap">
+          <div id="cog-focus-veil"></div>
+          <div class="overlay" id="tabs"></div>
+          <div class="anim-tools">
+            <button class="secondary" id="skip-anim" style="display:none" onclick="skipAnim()" data-i18n="skipAnim">跳过动画</button>
+            <button class="secondary" id="replay" onclick="replayAnim()" data-i18n="replay">▶ 重放动画</button>
+          </div>
+          <div class="float stat" id="stat" style="display:none"></div>
+          <div class="float legend" id="legend" style="display:none"></div>
+          <div class="float detail" id="detail"></div>
+        </div>
+        <div id="step-info-panel">
+          <div class="info-grid" id="step-info-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="library-modal" class="modal" style="display:none" onclick="if(event.target===this)closeItemLibrary()">
+  <div class="modal-box" style="width:min(680px,98vw)">
+    <div class="flex-between" style="margin-bottom:8px">
+      <h2 data-i18n="cargoLibrary" style="margin:0">货物库</h2>
+      <button type="button" class="secondary mini" onclick="addLibraryItem()" data-i18n="libAdd">+ 新增货物</button>
+    </div>
+    <div class="lib-hint" data-i18n="libraryDblHint">双击添加到装柜列表;⚙ 编辑库内属性;× 从库中删除</div>
+    <table class="lib-table" style="width:100%;font-size:12px">
+      <thead>
+        <tr>
+          <th data-i18n="name">名称</th>
+          <th data-i18n="L">长</th>
+          <th data-i18n="W">宽</th>
+          <th data-i18n="H">高</th>
+          <th data-i18n="wt">重</th>
+          <th data-i18n="stack">叠</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="library-body"></tbody>
+    </table>
+    <div class="modal-actions">
+      <button type="button" class="secondary" onclick="closeItemLibrary()" data-i18n="cancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<div id="item-modal" class="modal" style="display:none" onclick="if(event.target===this)closeItemModal()">
+  <div class="modal-box">
+    <h2 data-i18n="itemDetailTitle">货物详细信息</h2>
+    <div class="modal-top">
+      <div class="modal-grid">
+        <label class="full" style="grid-column:1/-1"><span data-i18n="name">名称</span><input type="text" id="md-name" /></label>
+        <label class="full" style="grid-column:1/-1"><span data-i18n="itemDesc">描述</span><input type="text" id="md-desc" /></label>
+        <label><span data-i18n="netWt">净重</span><input type="number" id="md-weight" step="0.1" /></label>
+        <label><span data-i18n="grossWt">毛重</span><input type="number" id="md-gross" step="0.1" placeholder="自动" /></label>
+        <label class="full" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px">
+          <span data-i18n="weightUnitLabel">重量单位</span>
+          <select id="md-wt-unit" onchange="onDetailWtUnitChange(this.value)"></select>
+        </label>
+        <label><span data-i18n="itemColor">颜色</span><input type="color" id="md-color" /></label>
+        <label><span data-i18n="stackLevel">堆码级别</span><input type="number" id="md-stack-level" min="1" max="99" title="" /></label>
+        <label><span data-i18n="itemPrice">整箱价格</span><input type="number" id="md-price" step="0.01" /></label>
+        <label><span data-i18n="pcsPerBox">每箱小件数</span><input type="number" id="md-pcs" min="1" /></label>
+        <label><span data-i18n="qty">数量</span><input type="number" id="md-qty" min="0" /></label>
+        <label class="mode-field" data-modes="multi_multi volume_ratio variable_qty" id="md-wrap-load-order">
+          <span data-i18n="spatialOrder">空间顺序</span>
+          <input type="number" id="md-load-order" step="1" title="" />
+        </label>
+        <label class="mode-field" data-modes="volume_ratio" id="md-wrap-volume-ratio">
+          <span data-i18n="volumeRatio">体积比</span>
+          <input type="number" id="md-volume-ratio" step="0.1" min="0.01" value="1" />
+        </label>
+        <label class="mode-field full" data-modes="variable_qty" id="md-wrap-maximize" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px">
+          <input type="checkbox" id="md-maximize-load" style="width:auto" />
+          <span data-i18n="maximizeLoad">尽量装载</span>
+        </label>
+        <label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="md-stackable" style="width:auto" /><span data-i18n="stack">可堆叠</span></label>
+      </div>
+      <div id="md-preview" class="preview-box"></div>
+    </div>
+    <div class="modal-tabs">
+      <button type="button" class="tab active" data-tab="basic" onclick="switchItemTab('basic')" data-i18n="tabBasic">尺寸</button>
+      <button type="button" class="tab" data-tab="orient" onclick="switchItemTab('orient')" data-i18n="tabOrient">摆放限制</button>
+    </div>
+    <div id="tab-basic">
+      <div class="modal-unit-bar">
+        <label>
+          <span data-i18n="sizeUnitLabel">尺寸单位</span>
+          <select id="md-len-unit" onchange="onDetailLenUnitChange(this.value)"></select>
+        </label>
+        <span id="md-size-unit-hint" style="font-size:11px"></span>
+      </div>
+      <table class="size-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th data-i18n="origSize">原尺寸</th>
+            <th data-i18n="deformCoeff">型变系数</th>
+            <th data-i18n="deformTol">型变公差</th>
+            <th data-i18n="deformFinal">型变后尺寸</th>
+            <th data-i18n="minSupport">最少底部承托</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-i18n="L">长</td>
+            <td><input type="number" id="md-orig-l" step="1" /></td>
+            <td><div class="cell-radio"><input type="radio" name="deform-mode" value="coeff" /><input type="number" id="md-coeff-l" step="0.1" value="0" />%</div></td>
+            <td><div class="cell-radio"><input type="radio" name="deform-mode" value="tol" /><input type="number" id="md-tol-l" step="0.1" value="0" /></div></td>
+            <td><div class="cell-radio"><input type="radio" name="deform-mode" value="final" checked /><input type="number" id="md-final-l" step="1" /></div></td>
+            <td><input type="number" id="md-support-l" step="1" min="0" max="100" value="70" />%</td>
+          </tr>
+          <tr>
+            <td data-i18n="W">宽</td>
+            <td><input type="number" id="md-orig-w" step="1" /></td>
+            <td><input type="number" id="md-coeff-w" step="0.1" value="0" />%</td>
+            <td><input type="number" id="md-tol-w" step="0.1" value="0" /></td>
+            <td><input type="number" id="md-final-w" step="1" /></td>
+            <td><input type="number" id="md-support-w" step="1" min="0" max="100" value="70" />%</td>
+          </tr>
+          <tr>
+            <td data-i18n="H">高</td>
+            <td><input type="number" id="md-orig-h" step="1" /></td>
+            <td><input type="number" id="md-coeff-h" step="0.1" value="0" />%</td>
+            <td><input type="number" id="md-tol-h" step="0.1" value="0" /></td>
+            <td><input type="number" id="md-final-h" step="1" /></td>
+            <td><input type="number" id="md-support-h" step="1" min="0" max="100" value="70" />%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="tab-orient" style="display:none">
+      <table class="orient-table">
+        <thead>
+          <tr>
+            <th data-i18n="orientDir">摆放方向</th>
+            <th data-i18n="orientAllow">允许</th>
+            <th data-i18n="loadBearing">承重面</th>
+            <th data-i18n="supportLevel">承托级别</th>
+            <th data-i18n="selfStackLimit">自身堆码限制</th>
+            <th data-i18n="maxStackLayers">最大堆码层数</th>
+          </tr>
+        </thead>
+        <tbody id="md-orient-body"></tbody>
+      </table>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px" data-i18n="orientHint">可多选摆放方向;取消承重面则上方不可再堆叠</div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" onclick="closeItemModal()" data-i18n="cancel">取消</button>
+      <button type="button" onclick="saveItemDetail()" data-i18n="ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="container-modal" class="modal" style="display:none" onclick="if(event.target===this)closeContainerModal()">
+  <div class="modal-box">
+    <h2 data-i18n="containerDetailTitle">集装箱详细信息</h2>
+    <div class="modal-top">
+      <div class="modal-grid">
+        <label class="full" style="grid-column:1/-1"><span data-i18n="name">名称</span><input type="text" id="cd-name" /></label>
+        <label class="full" style="grid-column:1/-1"><span data-i18n="itemDesc">描述</span><input type="text" id="cd-desc" /></label>
+        <label><span data-i18n="itemColor">颜色</span><input type="color" id="cd-color" /></label>
+        <label class="mode-field" data-modes="multi_multi volume_ratio variable_qty">
+          <span data-i18n="freight">运费</span><input type="number" id="cd-freight" step="0.01" min="0" />
+        </label>
+        <label class="mode-field" data-modes="multi_multi volume_ratio variable_qty">
+          <span data-i18n="maxAvailable">最多可用</span><input type="number" id="cd-max-available" step="1" min="0" placeholder="不限" />
+        </label>
+      </div>
+      <div id="cd-preview" class="preview-box"></div>
+    </div>
+    <div class="modal-unit-bar">
+      <label>
+        <span data-i18n="sizeUnitLabel">尺寸单位</span>
+        <select id="cd-len-unit" onchange="onContainerLenUnitChange(this.value)"></select>
+      </label>
+    </div>
+    <table class="size-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th data-i18n="innerDims">内部尺寸</th>
+          <th data-i18n="cornerDims">角件尺寸</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="L">长</td>
+          <td><input type="number" id="cd-inner-l" step="1" /></td>
+          <td><input type="number" id="cd-corner-l" step="1" min="0" value="0" /></td>
+        </tr>
+        <tr>
+          <td data-i18n="W">宽</td>
+          <td><input type="number" id="cd-inner-w" step="1" /></td>
+          <td><input type="number" id="cd-corner-w" step="1" min="0" value="0" /></td>
+        </tr>
+        <tr>
+          <td data-i18n="H">高</td>
+          <td><input type="number" id="cd-inner-h" step="1" /></td>
+          <td><input type="number" id="cd-corner-h" step="1" min="0" value="0" /></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="modal-grid" style="margin-top:12px">
+      <label><span data-i18n="tareWeight">空柜自重</span><input type="number" id="cd-tare" step="0.1" min="0" /></label>
+      <label><span data-i18n="payload">载重上限</span><input type="number" id="cd-payload" step="0.1" min="0" /></label>
+      <label class="full" style="grid-column:1/-1;flex-direction:row;align-items:center;gap:8px">
+        <span data-i18n="weightUnitLabel">重量单位</span>
+        <select id="cd-wt-unit" onchange="onContainerWtUnitChange(this.value)"></select>
+      </label>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px" data-i18n="containerDetailHint">内部尺寸为可码放外廓;角件从各轴两端扣除,参与装箱边界计算</div>
+    <div class="modal-actions">
+      <button type="button" class="secondary" onclick="closeContainerModal()" data-i18n="cancel">取消</button>
+      <button type="button" onclick="saveContainerDetail()" data-i18n="ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>
