@@ -87,7 +87,7 @@ const UI = {
   /* ---- sections ---- */
   sec01:           { zh: "路线图", en: "Roadmap" },
   sec01_aside:     { zh: "从左到右 · 从上到下", en: "left → right · top → bottom" },
-  sec02:           { zh: "四大模块", en: "Four modules" },
+  sec02:           { zh: "全部模块", en: "All modules" },
   sec02_aside:     { zh: "点击进入", en: "click to enter" },
   sec03:           { zh: "怎么用这份地图", en: "How to use this map" },
   sec03_aside:     { zh: "三条原则", en: "three rules" },

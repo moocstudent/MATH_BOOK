@@ -963,6 +963,276 @@ function LinearBDemo() {
   );
 }
 
+/* ============ small arrow helper (canvas px coords) ============ */
+function vizArrow(ctx, x1, y1, x2, y2, color, w) {
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = w || 2;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const a = Math.atan2(y2 - y1, x2 - x1), hl = 8;
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hl * Math.cos(a - 0.4), y2 - hl * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - hl * Math.cos(a + 0.4), y2 - hl * Math.sin(a + 0.4));
+  ctx.closePath(); ctx.fill();
+}
+
+/* ============ g5: partial derivative = slope of a frozen slice ============ */
+function PartialSliceDemo() {
+  const lang = useLang();
+  const [mode, setMode] = React.useState("x");   // ∂/∂x (freeze y) or ∂/∂y (freeze x)
+  const [x0, setX0] = React.useState(1);
+  const [y0, setY0] = React.useState(1);
+  // f(x,y) = x² + y² + xy ;  f_x = 2x + y ,  f_y = 2y + x
+  const xr = [-3, 3], yr = [-2, 10];
+  const alongX = mode === "x";
+  const g = alongX ? (t) => t * t + y0 * y0 + t * y0 : (t) => x0 * x0 + t * t + x0 * t;
+  const t0 = alongX ? x0 : y0;
+  const slope = alongX ? (2 * x0 + y0) : (2 * y0 + x0);
+  const g0 = g(t0);
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    plotFn(ctx, ax, g, xr, yr, c.accent, 2.4);
+    ctx.strokeStyle = c.primary; ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ax.X(xr[0]), ax.Y(g0 + slope * (xr[0] - t0)));
+    ctx.lineTo(ax.X(xr[1]), ax.Y(g0 + slope * (xr[1] - t0)));
+    ctx.stroke();
+    dot(ctx, ax.X(t0), ax.Y(Math.max(yr[0], Math.min(yr[1], g0))), 4.5, c.primary);
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText(alongX
+      ? (lang === "zh" ? "横轴 = x(冻结 y = " + fmtNum(y0) + ")" : "axis = x  (y frozen = " + fmtNum(y0) + ")")
+      : (lang === "zh" ? "横轴 = y(冻结 x = " + fmtNum(x0) + ")" : "axis = y  (x frozen = " + fmtNum(x0) + ")"), 14, 14);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <div className="viz-seg">
+          <button className={alongX ? "active" : ""} onClick={() => setMode("x")}>∂f/∂x</button>
+          <button className={!alongX ? "active" : ""} onClick={() => setMode("y")}>∂f/∂y</button>
+        </div>
+        <Slider label="x₀" value={x0} min={-2} max={2} step={0.1} onChange={setX0} />
+        <Slider label="y₀" value={y0} min={-2} max={2} step={0.1} onChange={setY0} />
+      </div>
+      <Readout>f = x² + y² + xy &nbsp;·&nbsp; {alongX ? <>f<sub>x</sub> = 2x₀ + y₀ = <b>{fmtNum(slope)}</b></> : <>f<sub>y</sub> = 2y₀ + x₀ = <b>{fmtNum(slope)}</b></>}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "偏导数 = 把另一个变量冻结后所得一元函数的导数。橙线是冻结后的切片曲线,绿线是它在选定点的切线,斜率就是偏导数。切换 ∂x/∂y、拖动 x₀,y₀,看切片与斜率如何变化。" : "A partial derivative is the ordinary derivative of the slice you get by freezing the other variable. The orange curve is that slice; the green line is its tangent at the chosen point, whose slope is the partial. Toggle ∂x/∂y and drag x₀, y₀."}</div>
+    </div>
+  );
+}
+
+/* ============ g5: gradient field + directional derivative ============ */
+function GradientFieldDemo() {
+  const lang = useLang();
+  const [surf, setSurf] = React.useState("bowl");   // bowl x²+y²  |  saddle x²−y²
+  const [px, setPx] = React.useState(1.2);
+  const [py, setPy] = React.useState(0.8);
+  const [theta, setTheta] = React.useState(0.6);
+  const xr = [-3, 3], yr = [-3, 3];
+  const bowl = surf === "bowl";
+  const f = bowl ? (x, y) => x * x + y * y : (x, y) => x * x - y * y;
+  const fx = (x, y) => 2 * x;
+  const fy = (x, y) => (bowl ? 2 * y : -2 * y);
+  const gx = fx(px, py), gy = fy(px, py), gmag = Math.hypot(gx, gy);
+  const ux = Math.cos(theta), uy = Math.sin(theta);
+  const dderiv = gx * ux + gy * uy;
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    const N = 24;
+    let vmax = 1e-6;
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const x = xr[0] + (i + 0.5) / N * (xr[1] - xr[0]), y = yr[0] + (j + 0.5) / N * (yr[1] - yr[0]);
+      vmax = Math.max(vmax, Math.abs(f(x, y)));
+    }
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+      const xa = xr[0] + i / N * (xr[1] - xr[0]), xb = xr[0] + (i + 1) / N * (xr[1] - xr[0]);
+      const ya = yr[0] + j / N * (yr[1] - yr[0]), yb = yr[0] + (j + 1) / N * (yr[1] - yr[0]);
+      const v = f((xa + xb) / 2, (ya + yb) / 2);
+      ctx.fillStyle = v >= 0 ? c.accent : c.primary;
+      ctx.globalAlpha = 0.12 + 0.5 * Math.min(1, Math.abs(v) / vmax);
+      ctx.fillRect(ax.X(xa), ax.Y(yb), ax.X(xb) - ax.X(xa) + 0.6, ax.Y(ya) - ax.Y(yb) + 0.6);
+    }
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.1;
+    ctx.beginPath(); ctx.moveTo(ax.X(xr[0]), ax.Y(0)); ctx.lineTo(ax.X(xr[1]), ax.Y(0)); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(yr[0])); ctx.lineTo(ax.X(0), ax.Y(yr[1])); ctx.stroke();
+    const Px = ax.X(px), Py = ax.Y(py);
+    let ex = px + 0.4 * gx, ey = py + 0.4 * gy;
+    const dl = Math.hypot(ex - px, ey - py), cap = 2.4;
+    if (dl > cap) { ex = px + (ex - px) / dl * cap; ey = py + (ey - py) / dl * cap; }
+    vizArrow(ctx, Px, Py, ax.X(px + 1.3 * ux), ax.Y(py + 1.3 * uy), c.primary, 2.2);
+    if (gmag > 1e-6) vizArrow(ctx, Px, Py, ax.X(ex), ax.Y(ey), c.accent, 2.8);
+    dot(ctx, Px, Py, 4.5, c.ink);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={300} />
+      <div className="viz-controls">
+        <div className="viz-seg">
+          <button className={bowl ? "active" : ""} onClick={() => setSurf("bowl")}>{lang === "zh" ? "碗 x²+y²" : "bowl x²+y²"}</button>
+          <button className={!bowl ? "active" : ""} onClick={() => setSurf("saddle")}>{lang === "zh" ? "鞍 x²−y²" : "saddle x²−y²"}</button>
+        </div>
+        <Slider label={lang === "zh" ? "点 x" : "point x"} value={px} min={-2.5} max={2.5} step={0.1} onChange={setPx} />
+        <Slider label={lang === "zh" ? "点 y" : "point y"} value={py} min={-2.5} max={2.5} step={0.1} onChange={setPy} />
+        <Slider label={lang === "zh" ? "方向角 θ" : "direction θ"} value={theta} min={0} max={2 * Math.PI} step={0.05} onChange={setTheta} />
+      </div>
+      <Readout>∇f = (<b>{fmtNum(gx)}</b>, <b>{fmtNum(gy)}</b>) &nbsp;·&nbsp; |∇f| = <b>{fmtNum(gmag)}</b> &nbsp;·&nbsp; ∂f/∂l = ∇f·û = <b>{fmtNum(dderiv)}</b></Readout>
+      <div className="viz-caption">{lang === "zh" ? "颜色深浅表示 f 值。橙色梯度箭头指向 f 增大最快的方向(垂直于等值线),其长度即最大变化率 |∇f|;绿色是你选的方向 û,方向导数 ∂f/∂l 就是梯度在 û 上的投影 ∇f·û。" : "Shading shows the value of f. The orange gradient arrow points where f grows fastest (perpendicular to the level sets); its length is the maximum rate |∇f|. The green arrow is your chosen direction û, and the directional derivative ∂f/∂l is the projection ∇f·û."}</div>
+    </div>
+  );
+}
+
+/* ============ g6: double integral as a limit of cell sums ============ */
+function DoubleRiemannDemo() {
+  const lang = useLang();
+  const [n, setN] = React.useState(6);
+  const f = (x, y) => x * x + y * y;   // on [0,1]², exact ∬ = 2/3
+  const h = 1 / n;
+  let approx = 0;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) approx += f((i + 0.5) * h, (j + 0.5) * h) * h * h;
+  const xr = [-0.18, 1.18], yr = [-0.18, 1.18];
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    const vmax = 2;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const v = f((i + 0.5) * h, (j + 0.5) * h);
+      ctx.fillStyle = c.accent; ctx.globalAlpha = 0.14 + 0.62 * (v / vmax);
+      ctx.fillRect(ax.X(i * h), ax.Y((j + 1) * h), ax.X((i + 1) * h) - ax.X(i * h) + 0.6, ax.Y(j * h) - ax.Y((j + 1) * h) + 0.6);
+    }
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = c.hair; ctx.lineWidth = 1;
+    for (let i = 0; i <= n; i++) {
+      ctx.beginPath(); ctx.moveTo(ax.X(i * h), ax.Y(0)); ctx.lineTo(ax.X(i * h), ax.Y(1)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(i * h)); ctx.lineTo(ax.X(1), ax.Y(i * h)); ctx.stroke();
+    }
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.6;
+    ctx.strokeRect(ax.X(0), ax.Y(1), ax.X(1) - ax.X(0), ax.Y(0) - ax.Y(1));
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={250} />
+      <div className="viz-controls">
+        <Slider label={lang === "zh" ? "每边格数 n" : "cells/side n"} value={n} min={1} max={16} step={1} onChange={(v) => setN(Math.round(v))} />
+      </div>
+      <Readout>{n}×{n} = {n * n} {lang === "zh" ? "格" : "cells"} &nbsp;·&nbsp; {lang === "zh" ? "近似" : "approx"} ≈ <b>{Math.round(approx * 1000) / 1000}</b> &nbsp;·&nbsp; {lang === "zh" ? "精确" : "exact"} = 0.667</Readout>
+      <div className="viz-caption">{lang === "zh" ? "二重积分是把区域 D 切成小格、每格取样 f·ΔA 再求和的极限。这里 D=[0,1]²,f=x²+y²,颜色越深 f 越大。增大 n,方格和越来越接近精确值 2/3。" : "A double integral is the limit of chopping D into cells and summing f·ΔA. Here D=[0,1]² and f=x²+y²; darker means larger f. As n grows, the cell sum approaches the exact 2/3."}</div>
+    </div>
+  );
+}
+
+/* ============ g6: swapping the order of integration ============ */
+function OrderSwapDemo() {
+  const lang = useLang();
+  const [mode, setMode] = React.useState("dydx");
+  const [s, setS] = React.useState(0.55);
+  const xr = [-0.2, 1.25], yr = [-0.2, 1.25];
+  const dydx = mode === "dydx";
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    ctx.fillStyle = c.accent; ctx.globalAlpha = 0.12;
+    ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(1)); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = c.primary; ctx.globalAlpha = 0.3; ctx.lineWidth = 1;
+    const NS = 12;
+    for (let i = 1; i < NS; i++) {
+      const t = i / NS; ctx.beginPath();
+      if (dydx) { ctx.moveTo(ax.X(t), ax.Y(0)); ctx.lineTo(ax.X(t), ax.Y(t)); }
+      else { ctx.moveTo(ax.X(t), ax.Y(t)); ctx.lineTo(ax.X(1), ax.Y(t)); }
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = c.ink; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(ax.X(0), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(0)); ctx.lineTo(ax.X(1), ax.Y(1)); ctx.closePath(); ctx.stroke();
+    ctx.strokeStyle = c.accent; ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    if (dydx) { ctx.moveTo(ax.X(s), ax.Y(0)); ctx.lineTo(ax.X(s), ax.Y(s)); }
+    else { ctx.moveTo(ax.X(s), ax.Y(s)); ctx.lineTo(ax.X(1), ax.Y(s)); }
+    ctx.stroke();
+    ctx.fillStyle = c.muted; ctx.font = "11px ui-monospace,monospace";
+    ctx.textAlign = "left"; ctx.textBaseline = "bottom";
+    ctx.fillText("y = x", ax.X(0.7), ax.Y(0.7) - 5);
+  };
+  const inner = dydx
+    ? (lang === "zh" ? `内层 y:0 → x   (此处 x=${fmtNum(s)}, y∈[0, ${fmtNum(s)}])` : `inner y: 0 → x   (here x=${fmtNum(s)}, y∈[0, ${fmtNum(s)}])`)
+    : (lang === "zh" ? `内层 x:y → 1   (此处 y=${fmtNum(s)}, x∈[${fmtNum(s)}, 1])` : `inner x: y → 1   (here y=${fmtNum(s)}, x∈[${fmtNum(s)}, 1])`);
+  return (
+    <div>
+      <Canvas draw={draw} height={260} />
+      <div className="viz-controls">
+        <div className="viz-seg">
+          <button className={dydx ? "active" : ""} onClick={() => setMode("dydx")}>{lang === "zh" ? "竖条 ∫dx∫dy" : "vertical ∫dx∫dy"}</button>
+          <button className={!dydx ? "active" : ""} onClick={() => setMode("dxdy")}>{lang === "zh" ? "横条 ∫dy∫dx" : "horizontal ∫dy∫dx"}</button>
+        </div>
+        <Slider label={lang === "zh" ? (dydx ? "竖条位置 x" : "横条位置 y") : (dydx ? "strip x" : "strip y")} value={s} min={0.05} max={0.95} step={0.05} onChange={setS} />
+      </div>
+      <Readout>{dydx ? "∫[0,1] dx ∫[0,x] f dy" : "∫[0,1] dy ∫[y,1] f dx"} &nbsp;·&nbsp; {inner}</Readout>
+      <div className="viz-caption">{lang === "zh" ? "同一个三角形区域 {0≤y≤x≤1},两种积分次序对应两种切法:竖条先对 y 积(内层 0→x),横条先对 x 积(内层 y→1)。换序时区域不变,只是把内层上下限用另一个变量重新表达。" : "The same triangle {0≤y≤x≤1}, two integration orders: vertical strips integrate y first (inner 0→x), horizontal strips integrate x first (inner y→1). Swapping the order keeps the region — only the inner limits get re-expressed."}</div>
+    </div>
+  );
+}
+
+/* ============ g7: Green's theorem — circulation = ∬ curl ============ */
+function GreenTheoremDemo() {
+  const lang = useLang();
+  const [field, setField] = React.useState("rot");
+  const [R, setR] = React.useState(1.5);
+  const xr = [-3, 3], yr = [-3, 3];
+  const FIELDS = {
+    rot:   { P: (x, y) => -y, Q: (x, y) => x, curl: 2, name: "(−y, x)" },
+    shear: { P: (x, y) => 0,  Q: (x, y) => x, curl: 1, name: "(0, x)" },
+    grad:  { P: (x, y) => x,  Q: (x, y) => y, curl: 0, name: "(x, y)" },
+  };
+  const F = FIELDS[field];
+  const circ = F.curl * Math.PI * R * R;
+  const conservative = F.curl === 0;
+  const draw = (ctx, W, H) => {
+    const ax = makeAxes(ctx, W, H, xr, yr);
+    const c = ax.c;
+    const col = conservative ? c.primary : c.accent;
+    const Rpx = Math.abs(ax.X(R) - ax.X(0));
+    ctx.save(); ctx.fillStyle = col; ctx.globalAlpha = 0.1;
+    ctx.beginPath(); ctx.arc(ax.X(0), ax.Y(0), Rpx, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
+    // vector field (quiver), length grows mildly with magnitude
+    for (let x = -2.4; x <= 2.41; x += 0.75) for (let y = -2.4; y <= 2.41; y += 0.75) {
+      let vx = F.P(x, y) * 0.16, vy = F.Q(x, y) * 0.16;
+      const L = Math.hypot(vx, vy);
+      if (L < 1e-9) { dot(ctx, ax.X(x), ax.Y(y), 1.6, c.muted); continue; }
+      if (L > 0.36) { vx *= 0.36 / L; vy *= 0.36 / L; }
+      ctx.globalAlpha = 0.5;
+      vizArrow(ctx, ax.X(x), ax.Y(y), ax.X(x + vx), ax.Y(y + vy), c.muted, 1.3);
+      ctx.globalAlpha = 1;
+    }
+    // boundary curve L
+    ctx.strokeStyle = col; ctx.lineWidth = 2.6;
+    ctx.beginPath(); ctx.arc(ax.X(0), ax.Y(0), Rpx, 0, 2 * Math.PI); ctx.stroke();
+    // CCW orientation arrowheads
+    for (let k = 0; k < 8; k++) {
+      const th = k / 8 * 2 * Math.PI, bx = R * Math.cos(th), by = R * Math.sin(th);
+      const tx = -Math.sin(th), ty = Math.cos(th);
+      vizArrow(ctx, ax.X(bx - tx * 0.001), ax.Y(by - ty * 0.001), ax.X(bx + tx * 0.28), ax.Y(by + ty * 0.28), col, 2.2);
+    }
+    dot(ctx, ax.X(0), ax.Y(0), 3, c.ink);
+  };
+  return (
+    <div>
+      <Canvas draw={draw} height={300} />
+      <div className="viz-controls">
+        <div className="viz-seg">
+          <button className={field === "rot" ? "active" : ""} onClick={() => setField("rot")}>{lang === "zh" ? "旋转场 (−y,x)" : "rotation (−y,x)"}</button>
+          <button className={field === "shear" ? "active" : ""} onClick={() => setField("shear")}>(0, x)</button>
+          <button className={field === "grad" ? "active" : ""} onClick={() => setField("grad")}>{lang === "zh" ? "梯度场 (x,y)" : "gradient (x,y)"}</button>
+        </div>
+        <Slider label={lang === "zh" ? "半径 R" : "radius R"} value={R} min={0.5} max={2.5} step={0.1} onChange={setR} />
+      </div>
+      <Readout>F = {F.name} &nbsp;·&nbsp; {lang === "zh" ? "旋度" : "curl"} Q<sub>x</sub>−P<sub>y</sub> = <b>{F.curl}</b> &nbsp;·&nbsp; ∮<sub>L</sub> = ∬<sub>D</sub>(Q<sub>x</sub>−P<sub>y</sub>)dσ = {F.curl}·πR² = <b>{Math.round(circ * 100) / 100}</b></Readout>
+      <div className="viz-caption">{lang === "zh" ? "格林公式:沿正向边界 L 的环流量 ∮ P dx+Q dy,等于区域 D 上旋度 (∂Q/∂x−∂P/∂y) 的积分。这三个场旋度恒定,故环流量 = 旋度 × 面积(πR²)。梯度场 (x,y) 旋度为 0,是保守场,环流量恒为 0。" : "Green's theorem: the circulation ∮ P dx+Q dy around the positively-oriented boundary L equals the integral of the curl (∂Q/∂x−∂P/∂y) over D. These three fields have constant curl, so circulation = curl × area (πR²). The gradient field (x,y) has curl 0 — it is conservative, so its circulation is always 0."}</div>
+    </div>
+  );
+}
+
 const VIZ = {
   permSlots: () => <PermSlotsDemo />,
   combSelect: () => <CombSelectDemo />,
@@ -984,6 +1254,11 @@ const VIZ = {
   gradient: () => <GradientDemo />,
   sequence: () => <SequenceDemo />,
   trig: () => <TrigDemo />,
+  partialSlice: () => <PartialSliceDemo />,
+  gradientField: () => <GradientFieldDemo />,
+  doubleRiemann: () => <DoubleRiemannDemo />,
+  orderSwap: () => <OrderSwapDemo />,
+  greenTheorem: () => <GreenTheoremDemo />,
 };
 
 const VIZ_TITLE = {
@@ -999,6 +1274,11 @@ const VIZ_TITLE = {
   linearK: { zh: "斜率 k 决定倾斜", en: "Slope k controls tilt" },
   linearB: { zh: "截距 b 决定上下平移", en: "Intercept b shifts the line" },
   linear: { zh: "一次函数 y = kx + b", en: "Linear function y = kx + b" },
+  partialSlice: { zh: "偏导数 = 切片的斜率", en: "Partial derivative as a slice's slope" },
+  gradientField: { zh: "梯度与方向导数", en: "Gradient & directional derivative" },
+  doubleRiemann: { zh: "二重积分 = 小格求和的极限", en: "Double integral as a limit of cell sums" },
+  orderSwap: { zh: "交换积分次序", en: "Swapping the order of integration" },
+  greenTheorem: { zh: "格林公式:环流量 = 旋度的积分", en: "Green's theorem: circulation = ∬ curl" },
 };
 
 function Viz({ name }) {
